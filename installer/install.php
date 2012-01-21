@@ -446,11 +446,15 @@ class Install
 				);
 			$db_schema = str_replace($find, $replace, $db_schema);
 		}
+		
+		// Add table schema's with str_replace ?
 
 		// Use todays date as the date for the first incident in the system
 		$db_schema = str_replace('2010-01-01 12:00:00',
 			date("Y-m-d H:i:s",time()), $db_schema);
 
+		// Set schema encoding here
+		// CREATE DATABASE  dbname DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 		$result = @mysql_query('CREATE DATABASE '.$db_name);
 
 		// select newly created db

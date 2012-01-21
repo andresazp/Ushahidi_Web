@@ -69,7 +69,8 @@
 						<tr>
 							<th scope="row"><label for="db_name">Database Name</label></th>
 							<td><input type="text" value="<?php print $form->value('db_name'); ?>" size="25" id="db_name" name="db_name"/></td>
-							<td>The name of the database you want to run Ushahidi in. </td>
+							<td>The name of the database you want to run Ushahidi in.<br />
+              This will be created if it doesn't yet exist. If this is an existing database the character set should be set to utf8.</td>
 						</tr>
 						<tr>
 							<th scope="row"><label for="username">User Name</label></th>
