@@ -87,12 +87,13 @@ exec { "apache2-reload":
   command     => "service apache2 reload",
   refreshonly => true,
 }
-
-file { '/etc/apache2/mods-enabled/rewrite.conf':
-  ensure => 'link',
-  target => '/etc/apache2/mods-available/rewrite.conf',
-  require => Package["apache2"],
+exec { "apache2-mod-rewrite":
+  command     => "a2enmod rewrite",
+  notify => [Exec["apache2-reload"], ],
 }
+
+#@todo: disable default site
+#@todo: add ushahidi vhost and enable
 
 # phpunit
 exec {"pear-channel-phpunit":
