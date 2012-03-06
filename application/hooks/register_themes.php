@@ -40,36 +40,22 @@ class register_themes {
 		Kohana::config_set('core.modules', array_merge(array(THEMEPATH."default"),
 			Kohana::config("core.modules")));
 
-		$css_url = (Kohana::config("cdn.cdn_css")) ?
+		//not sure how this should work
+		/*$css_url = (Kohana::config("cdn.cdn_css")) ?
 			Kohana::config("cdn.cdn_css") : url::base();
-		$theme_css[] = $css_url."themes/default/css/style.css";
-
+		$theme_css[] = $css_url."themes/default/css/style.css";*/
+		
+		$theme_css = $this->_get_theme_files('default','css');
+		$theme_js = $this->_get_theme_files('default','js');
+		
 		// 2. Extend the default theme
-		$theme = THEMEPATH.Kohana::config("settings.site_style");
 		if ( Kohana::config("settings.site_style") != "default" )
 		{
-			Kohana::config_set('core.modules', array_merge(array($theme),
-				Kohana::config("core.modules")));
-
-			if ( is_dir($theme.'/css') )
-			{
-				$css = dir($theme.'/css'); // Load all the themes css files
-				while (($css_file = $css->read()) !== FALSE)
-					if (preg_match('/\.css/i', $css_file))
-					{
-						$theme_css[] = url::base()."themes/".Kohana::config("settings.site_style")."/css/".$css_file;
-					}
-			}
-
-			if ( is_dir($theme.'/js') )
-			{
-				$js = dir($theme.'/js'); // Load all the themes js files
-				while (($js_file = $js->read()) !== FALSE)
-					if (preg_match('/\.js/i', $js_file))
-					{
-						$theme_js[] = url::base()."themes/".Kohana::config("settings.site_style")."/js/".$js_file;
-					}
-			}
+			$theme = THEMEPATH.Kohana::config("settings.site_style");
+			Kohana::config_set('core.modules', array_merge(array($theme), Kohana::config("core.modules")));
+			
+			$theme_css = array_merge($theme_css, $this->_get_theme_files(Kohana::config("settings.site_style"),'css'));
+			$theme_js = array_merge($theme_js, $this->_get_theme_files(Kohana::config("settings.site_style"),'js'));
 		}
 
 		// 3. Find and add hooks
@@ -86,6 +72,28 @@ class register_themes {
 
 		Kohana::config_set('settings.site_style_css',$theme_css);
 		Kohana::config_set('settings.site_style_js',$theme_js);
+	}
+
+	/*
+	 * Build array of theme files (css or js)
+	 * @param string $style - theme name
+	 * @param string $type - css or js
+	 * @return Array
+	 */
+	function _get_theme_files($style, $type) {
+		$files = array();
+		$themedir = THEMEPATH.$style;
+		
+		if ( is_dir($themedir.'/'.$type) )
+		{
+			$dir = dir($themedir.'/'.$type); // Load all the themes css files
+			while (($file = $dir->read()) !== FALSE)
+				if (preg_match("/\.$type/i", $file))
+				{
+					$files[basename($file)] = url::base()."themes/$style/$type/".$file;
+				}
+		}
+		return $files;
 	}
 }
 
