@@ -39,11 +39,6 @@ class register_themes {
 		// 1. Load the default theme
 		Kohana::config_set('core.modules', array_merge(array(THEMEPATH."default"),
 			Kohana::config("core.modules")));
-
-		//not sure how this should work
-		/*$css_url = (Kohana::config("cdn.cdn_css")) ?
-			Kohana::config("cdn.cdn_css") : url::base();
-		$theme_css[] = $css_url."themes/default/css/style.css";*/
 		
 		$theme_css = $this->_get_theme_files('default','css');
 		$theme_js = $this->_get_theme_files('default','js');
@@ -84,13 +79,15 @@ class register_themes {
 		$files = array();
 		$themedir = THEMEPATH.$style;
 		
+		$base_url = (Kohana::config("cdn.cdn_$type")) ? Kohana::config("cdn.cdn_$type").'themes/' : url::base().'themes/';
+		
 		if ( is_dir($themedir.'/'.$type) )
 		{
 			$dir = dir($themedir.'/'.$type); // Load all the themes css files
 			while (($file = $dir->read()) !== FALSE)
 				if (preg_match("/\.$type/i", $file))
 				{
-					$files[basename($file)] = url::base()."themes/$style/$type/".$file;
+					$files[basename($file)] = $base_url."$style/$type/".$file;
 				}
 		}
 		return $files;
