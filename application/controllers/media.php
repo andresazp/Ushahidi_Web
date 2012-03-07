@@ -81,10 +81,10 @@ class Media_Controller extends Controller {
             $file_data = $this->_css_compress($file_data);
         }
 
-        /*if ($ext == "js" AND strpos($file,'.min.js') === FALSE AND strpos($file,'.pack.js') === FALSE)
+        if ($ext == "js" AND strpos($file,'.min.js') === FALSE AND strpos($file,'.pack.js') === FALSE)
         { // Compress JS data
             $file_data = $this->_js_compress($file_data);
-        }*/
+        }
 
         // HTTP Headers
         $expiry_time = 613200;  // 1 Week
@@ -149,8 +149,7 @@ class Media_Controller extends Controller {
 
     private function _js_compress($data)
     {
-        $packer = new javascriptpacker($data);
-        return $packer->pack();
+        return Minify_Js_Driver::minify($data);
     }
 
 }

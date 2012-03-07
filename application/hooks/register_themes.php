@@ -87,7 +87,7 @@ class register_themes {
 			while (($file = $dir->read()) !== FALSE)
 				if (preg_match("/\.$type/i", $file))
 				{
-					$files[basename($file)] = $base_url."$style/$type/".$file;
+					$files[basename($file)] = "themes/$style/$type/".$file;
 				}
 		}
 		return $files;

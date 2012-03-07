@@ -81,26 +81,26 @@ class Themes_Core {
 	 */
 	private function _header_css()
 	{
-		$core_css = "";
-		$core_css .= html::stylesheet($this->css_url."media/css/jquery-ui-themeroller", "", true);
+		$core_css_combine = array(); $core_css = "";
+		$core_css_combine[] = "media/css/jquery-ui-themeroller";
 
 		foreach (Kohana::config("settings.site_style_css") as $theme_css)
 		{
-			$core_css .= html::stylesheet($theme_css,"",true);
+			$core_css_combine[] = $theme_css;
 		}
 
 		$core_css .= "<!--[if lte IE 7]>".html::stylesheet($this->css_url."media/css/iehacks","",true)."<![endif]-->";
 		$core_css .= "<!--[if IE 7]>".html::stylesheet($this->css_url."media/css/ie7hacks","",true)."<![endif]-->";
 		$core_css .= "<!--[if IE 6]>".html::stylesheet($this->css_url."media/css/ie6hacks","",true)."<![endif]-->";
 
-		if ($this->map_enabled)
+		if ($this->map_enabled || Kohana::config('config.combine_css'))
 		{
-			$core_css .= html::stylesheet($this->css_url."media/css/openlayers","",true);
+			$core_css_combine[] = "media/css/openlayers";
 		}
 
-		if ($this->treeview_enabled)
+		if ($this->treeview_enabled || Kohana::config('config.combine_css'))
 		{
-			$core_css .= html::stylesheet($this->css_url."media/css/jquery.treeview","",true);
+			$core_css_combine[] = "media/css/jquery.treeview";
 		}
 
 		if ($this->photoslider_enabled)
@@ -113,22 +113,72 @@ class Themes_Core {
 			$core_css .= html::stylesheet($this->css_url."media/css/videoslider","",true);
 		}
 
-		if ($this->colorpicker_enabled)
+		if ($this->colorpicker_enabled || Kohana::config('config.combine_css'))
 		{
-			$core_css .= html::stylesheet($this->css_url."media/css/colorpicker","",true);
+			$core_css_combine[] = "media/css/colorpicker";
 		}
 
-		if ($this->site_style AND $this->site_style != "default")
-		{
-			$core_css .= html::stylesheet($this->css_url."themes/".$site_style."/style.css");
-		}
-
-		$core_css .= html::stylesheet($this->css_url."media/css/global","",true);
+		$core_css_combine[] = "media/css/global";
 
 		// Render CSS
 		$plugin_css = plugin::render('stylesheet');
 
+		if (Kohana::config('config.combine_css'))
+		{
+			$core_css = html::stylesheet($this->_combine_media($core_css_combine, 'css'),"",FALSE).$core_css;
+		}
+		else
+		{
+			foreach ($core_css_combine as $file) {
+				$core_css .= html::stylesheet($this->css_url.$file,"",true);
+			}
+		}
+		
 		return $core_css.$plugin_css;
+	}
+
+	/*
+	 * Combine and compress an array of css/js files
+	 * @param Array - file names
+	 * @param string - file type (css/js)
+	 * @return string - url for combined file
+	 **/
+	function _combine_media($files, $type) {
+		// Check for already compressed/combined file
+		$key = hash('sha256', serialize($files));
+		$filename = $this->cache->get($type.'_'.$key);
+		
+		$file_path = Kohana::config('upload.directory', TRUE);
+		// Make sure the directory ends with a slash
+		$file_path = rtrim($file_path, '/')."/$type/";
+		
+			
+		if ( empty($filename) || ! file_exists($file_path.$filename))
+		{
+			$combined = "";
+			$minify = new Minify($type);
+			foreach($files as $file) {
+				$combined .= $minify->compress($file,True);
+			}
+			
+			// Generate filename
+			$hash = base64_encode(hash('sha256', $combined, TRUE));
+			// Modify the hash so it's safe to use in URLs.
+			$filename = $type.'_'. strtr($hash, array('+' => '-', '/' => '_', '=' => '')).'.css';
+			
+			if ( ! is_dir($file_path))
+			{
+				// Create the upload directory
+				mkdir($file_path, 0777, TRUE);
+			}
+			// Output combined file
+			file_put_contents($file_path.$filename, $combined);
+			$this->cache->set($type.'_'.$key, $filename);
+		}
+		
+		$base_url = url::base().Kohana::config('upload.relative_directory')."/$type/";
+		
+		return $base_url.$filename;
 	}
 
 	/**
@@ -206,13 +256,13 @@ class Themes_Core {
 		{
 			$core_js .= html::script($theme_js,"",true);
 		}
-
+		
 		$inline_js_content = "function runScheduler(img){img.onload = null;img.src = '".url::site()."scheduler';}"
 			.'$(document).ready(function(){$(document).pngFix();});'
 			.$this->js;
 
 		$inline_js = "<script type=\"text/javascript\"><!--//";
-		$inline_js .= jsmin::minify($inline_js_content);
+		$inline_js .= Minify_Js_Driver::minify($inline_js_content);
 		$inline_js .= "//--></script>";
 
 		// Filter::header_js - Modify Header Javascript

@@ -1,5 +1,16 @@
-<?php
+<?php defined('SYSPATH') OR die('No direct access allowed.');
 /**
+ * Minify JS driver interface.
+ *
+ * $Id: Js.php $
+ *
+ * @package    Minify
+ * @author     Tom Morton
+ *
+ * BASED ON THE JSMIN CODE BY rgrove: http://code.google.com/p/jsmin-php 
+ */
+ 
+ /**
  * jsmin.php - PHP implementation of Douglas Crockford's JSMin.
  *
  * This is pretty much a direct port of jsmin.c to PHP with just a few
@@ -44,8 +55,8 @@
  * @version 1.1.1 (2008-03-02)
  * @link http://code.google.com/p/jsmin-php/
  */
-
-class JSMin_Core {
+ 
+class Minify_Js_Driver implements Minify_Driver {
   const ORD_LF    = 10;
   const ORD_SPACE = 32;
 
@@ -58,11 +69,11 @@ class JSMin_Core {
   protected $output      = '';
 
   // -- Public Static Methods --------------------------------------------------
-
   public static function minify($js) {
-    $jsmin = new JSMin($js);
+    $jsmin = new Minify_Js_Driver($js);
     return $jsmin->min();
   }
+
 
   // -- Public Instance Methods ------------------------------------------------
 
@@ -160,7 +171,8 @@ class JSMin_Core {
     return ord($c) > 126 || $c === '\\' || preg_match('/^[\w\$]$/', $c) === 1;
   }
 
-  protected function min() {
+  // make public for the interface
+  public function min() {
     $this->a = "\n";
     $this->action(3);
 
@@ -205,6 +217,7 @@ class JSMin_Core {
                 $this->action(1);
                 break;
               }
+
 
               $this->action(3);
               break;
@@ -268,7 +281,9 @@ class JSMin_Core {
                 break;
 
               case null:
-                throw new JSMinException('Unterminated comment.');
+                // REPLACED WITH KOHANA EXCEPTION
+                // throw new JSMinException('Unterminated comment.');
+                throw new Kohana_Exception('content.jsmin-comment');
             }
           }
 
@@ -285,7 +300,3 @@ class JSMin_Core {
     return $this->lookAhead;
   }
 }
-
-// -- Exceptions ---------------------------------------------------------------
-class JSMinException extends Exception {}
-?>

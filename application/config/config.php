@@ -49,6 +49,12 @@ $config['internal_cache'] = TRUE;
 $config['output_compression'] = TRUE;
 
 /**
+ * Enable or disable combining core and theme css files into 1 optimised file
+ * 
+ */
+$config['combine_css'] = FALSE;
+
+/**
  * Enable or disable global XSS filtering of GET, POST, and SERVER data. This
  * option also accepts a string to specify a specific XSS filtering tool.
  */
