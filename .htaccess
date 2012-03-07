@@ -9,6 +9,8 @@
 	# Protect application and system files from being viewed
 	RewriteRule ^(application|modules|system|tests|sql) - [F,L]
 
+	# Send media and theme css/js files to the media controller
+	RewriteRule ^(media)/.* index.php/$0 [L]
 	# Prevent schedulers from being accessed remotely
 	RewriteCond %{REMOTE_ADDR} !^127.0.0.1$
 	RewriteRule ^scheduler - [F,L]
