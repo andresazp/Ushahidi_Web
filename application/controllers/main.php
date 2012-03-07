@@ -465,8 +465,6 @@ class Main_Controller extends Template_Controller {
 
 		$this->themes->js->blocks_per_row = Kohana::config('settings.blocks_per_row');
 
-		//$myPacker = new javascriptpacker($js , 'Normal', false, false);
-		//$js = $myPacker->pack();
 
 		// Build Header and Footer Blocks
 		$this->template->header->header_block = $this->themes->header_block();

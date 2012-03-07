@@ -207,13 +207,13 @@ class Themes_Core {
 			$core_js .= html::script($theme_js,"",true);
 		}
 
-		// Inline Javascript
-		$inline_js = "<script type=\"text/javascript\">
-                        <!--//
-function runScheduler(img){img.onload = null;img.src = '".url::site().'scheduler'."';}
-			".'$(document).ready(function(){$(document).pngFix();});'.$this->js.
-                        "//-->
-                        </script>";
+		$inline_js_content = "function runScheduler(img){img.onload = null;img.src = '".url::site()."scheduler';}"
+			.'$(document).ready(function(){$(document).pngFix();});'
+			.$this->js;
+
+		$inline_js = "<script type=\"text/javascript\"><!--//";
+		$inline_js .= jsmin::minify($inline_js_content);
+		$inline_js .= "//--></script>";
 
 		// Filter::header_js - Modify Header Javascript
 		Event::run('ushahidi_filter.header_js', $inline_js);
