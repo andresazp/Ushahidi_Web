@@ -62,6 +62,7 @@ $web_packages = [
     "git",
     "postfix",
     "byobu",
+    "nfs-common",
 ]
 
 Package {
