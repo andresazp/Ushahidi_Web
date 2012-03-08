@@ -58,7 +58,7 @@ $config['combine_js'] = TRUE;
 /**
  * Enable or disbale compressing inline JS (ie. main_js)
  **/
-$config['compress_inline_js'] = TRUE;
+$config['compress_inline_js'] = FALSE;
 
 /**
  * Enable or disable global XSS filtering of GET, POST, and SERVER data. This
