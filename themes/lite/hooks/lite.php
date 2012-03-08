@@ -38,11 +38,19 @@ class lite {
 			'media/js/jquery.flot'
 		);
 		
+		$replace_js = array(
+			//'media/js/jquery.ui.min' => 'themes/lite/js/jquery-ui-1.8.18.custom.min'
+		);
+		
 		foreach($data as $key => $file)
 		{
 			if (in_array($file, $remove_js))
 			{
 				unset(Event::$data[$key]);
+			}
+			if (isset($replace_js[$file]))
+			{
+				Event::$data[$key] = $replace_js[$file];
 			}
 		}
 	}

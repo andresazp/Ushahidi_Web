@@ -190,7 +190,7 @@
 		});
 		
 		// Initialize accordion for Report Filters
-		//$( "#accordion" ).accordion({autoHeight: false});
+		$( "#accordion" ).accordion({autoHeight: false});
 		
 		// Report hovering events
 		addReportHoverEvents();
@@ -218,7 +218,7 @@
 			fetchReports();
 		});
 		
-		/*$("#accordion").accordion({change: function(event, ui){
+		$("#accordion").accordion({change: function(event, ui){
 			if ($(ui.newContent).hasClass("f-location-box"))
 			{
 				if (typeof radiusMap == 'undefined' || radiusMap == null)
@@ -274,7 +274,7 @@
 					});
 				}
 			}
-		}});*/
+		}});
 
 
 	});
