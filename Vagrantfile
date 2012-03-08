@@ -8,7 +8,7 @@ Vagrant::Config.run do |config|
   config.vm.network :hostonly, "192.168.33.11"
   # config.vm.network :bridged
   # config.vm.forward_port 80, 8080
-  config.vm.share_folder "www", "/var/www", "/Users/robbie/www/ushahidi_car"
+  config.vm.share_folder "www", "/var/www", "/Users/robbie/www/ushahidi_car", :nfs => true
   # Enable provisioning with Puppet stand alone.  Puppet manifests
   # are contained in a directory path relative to this Vagrantfile.
   # You will need to create the manifests directory and a manifest in
