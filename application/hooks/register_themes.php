@@ -43,10 +43,11 @@ class register_themes {
 		$theme_css = $this->_get_theme_files('default','css');
 		$theme_js = $this->_get_theme_files('default','js');
 		
+		$theme = THEMEPATH.Kohana::config("settings.site_style");
+		
 		// 2. Extend the default theme
 		if ( Kohana::config("settings.site_style") != "default" )
 		{
-			$theme = THEMEPATH.Kohana::config("settings.site_style");
 			Kohana::config_set('core.modules', array_merge(array($theme), Kohana::config("core.modules")));
 			
 			$theme_css = array_merge($theme_css, $this->_get_theme_files(Kohana::config("settings.site_style"),'css'));
