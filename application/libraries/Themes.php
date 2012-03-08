@@ -145,7 +145,7 @@ class Themes_Core {
 	 * @param string - file type (css/js)
 	 * @return string - url for combined file
 	 **/
-	function _combine_media($files, $type) {
+	private function _combine_media($files, $type) {
 		// Check for already compressed/combined file
 		$key = hash('sha256', serialize($files));
 		$filename = $this->cache->get($type.'_'.$key);
@@ -154,13 +154,23 @@ class Themes_Core {
 		// Make sure the directory ends with a slash
 		$file_path = rtrim($file_path, '/')."/$type/";
 		
-			
+		
 		if ( empty($filename) || ! file_exists($file_path.$filename))
 		{
 			$combined = "";
 			$minify = new Minify($type);
 			foreach($files as $file) {
-				$combined .= $minify->compress($file,True);
+				$compressed_file = $minify->compress($file,True);
+				// Rewrite CSS url paths
+				if ($type == 'css')
+				{
+					$path0 = str_replace(DOCROOT,'',realpath(dirname($file).'/../../').'/');
+					$path1 = str_replace(DOCROOT,'',realpath(dirname($file).'/../').'/');
+
+					$compressed_file = preg_replace('#url\([\'"]?(..\/..\/(.*))[\'"]?\)#iU','url("'.url::base().$path0.'$2")',$compressed_file);
+					$compressed_file = preg_replace('#url\([\'"]?(..\/(.*))[\'"]?\)#iU','url("'.url::base().$path1.'$2")',$compressed_file);
+				}
+				$combined .= $compressed_file;
 			}
 			
 			// Generate filename
@@ -254,7 +264,7 @@ class Themes_Core {
 
 		$inline_js = "<script type=\"text/javascript\"><!--//";
 		$inline_js .= Kohana::config('config.compress_inline_js') ? Minify_Js_Driver::minify($inline_js_content) : $inline_js_content;
-		$inline_js .= "//--></script>";
+		$inline_js .= "\n//--></script>";
 
 		// Filter::header_js - Modify Header Javascript
 		Event::run('ushahidi_filter.header_js', $inline_js);
