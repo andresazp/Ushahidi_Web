@@ -120,6 +120,8 @@ class Themes_Core {
 
 		$core_css_combine[] = "media/css/global";
 
+		Event::run('ushahidi_filter.header_core_css', $core_css_combine);
+		
 		// Render CSS
 		$plugin_css = plugin::render('stylesheet');
 
@@ -222,22 +224,8 @@ class Themes_Core {
 			$core_js_combine[] = "media/js/jquery.treeview";
 		}
 
-		if ($this->validator_enabled)
-		{
-			$core_js .= html::script($this->js_url."media/js/jquery.validate.min");
-		}
 
-		if ($this->photoslider_enabled)
-		{
-			$core_js .= html::script($this->js_url."media/js/picbox", true);
-		}
-
-		if($this->videoslider_enabled )
-		{
-			$core_js .= html::script($this->js_url."media/js/coda-slider.pack");
-		}
-
-		if ($this->colorpicker_enabled || Kohana::config('config.combine_js'))
+		if ($this->colorpicker_enabled)
 		{
 			$core_js_combine[] = "media/js/colorpicker";
 		}
@@ -255,7 +243,7 @@ class Themes_Core {
 		// Javascript files from themes
 		foreach (Kohana::config("settings.site_style_js") as $theme_js)
 		{
-			$core_js .= html::script($theme_js,"",true);
+			$core_js_combine[] = $theme_js;
 		}
 		
 		Event::run('ushahidi_filter.header_core_js', $core_js_combine);
@@ -281,6 +269,23 @@ class Themes_Core {
 				$core_js .= html::script($this->js_url.$file,"",true);
 			}
 		}
+		
+		// Other js files that need to come after jquery
+		if ($this->validator_enabled)
+		{
+			$core_js .= html::script($this->js_url."media/js/jquery.validate.min");
+		}
+
+		if ($this->photoslider_enabled)
+		{
+			$core_js .= html::script($this->js_url."media/js/picbox", true);
+		}
+
+		if($this->videoslider_enabled )
+		{
+			$core_js .= html::script($this->js_url."media/js/coda-slider.pack");
+		}
+		
 
 		return $core_js.$plugin_js.$inline_js;
 	}
