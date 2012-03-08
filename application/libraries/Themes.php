@@ -164,7 +164,7 @@ class Themes_Core {
 			// Generate filename
 			$hash = base64_encode(hash('sha256', $combined, TRUE));
 			// Modify the hash so it's safe to use in URLs.
-			$filename = $type.'_'. strtr($hash, array('+' => '-', '/' => '_', '=' => '')).'.css';
+			$filename = $type.'_'. strtr($hash, array('+' => '-', '/' => '_', '=' => '')).".$type";
 			
 			if ( ! is_dir($file_path))
 			{
@@ -187,38 +187,39 @@ class Themes_Core {
 	private function _header_js()
 	{
 		$core_js = "";
+		$core_js_combine = array();
 		if ($this->map_enabled)
 		{
 			$core_js .= html::script($this->js_url."media/js/OpenLayers", true);
 			$core_js .= "<script type=\"text/javascript\">OpenLayers.ImgPath = '".$this->js_url."media/img/openlayers/"."';</script>";
 		}
 
-		$core_js .= html::script($this->js_url."media/js/jquery", true);
-		//$core_js .= html::script($this->js_url."media/js/jquery.ui.min", true);
-		$core_js .= html::script("https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/jquery-ui.min.js", true);
-		$core_js .= html::script($this->js_url."media/js/jquery.pngFix.pack", true);
-		$core_js .= html::script($this->js_url."media/js/jquery.timeago", true);
+		$core_js_combine[] = "media/js/jquery";
+		$core_js_combine[] = "media/js/jquery.ui.min";
+		//$core_js .= html::script("https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/jquery-ui.min.js", true);
+		$core_js_combine[] = "media/js/jquery.pngFix.pack";
+		$core_js_combine[] = "media/js/jquery.timeago";
 
-		if ($this->map_enabled)
+		if ($this->map_enabled || Kohana::config('config.combine_js'))
 		{
 			$core_js .= $this->api_url;
 
-			if ($this->main_page || $this->this_page == "alerts")
+			if ($this->main_page || $this->this_page == "alerts" || Kohana::config('config.combine_js'))
 			{
-				$core_js .= html::script($this->js_url."media/js/selectToUISlider.jQuery", true);
+				$core_js_combine[] = "media/js/selectToUISlider.jQuery";
 			}
 
-			if ($this->main_page)
+			if ($this->main_page || Kohana::config('config.combine_js'))
 			{
-				$core_js .= html::script($this->js_url."media/js/jquery.flot", true);
-				$core_js .= html::script($this->js_url."media/js/timeline", true);
+				$core_js_combine[] = "media/js/jquery.flot";
+				$core_js_combine[] = "media/js/timeline";
 				$core_js .= "<!--[if IE]>".html::script($this->js_url."media/js/excanvas.min", true)."<![endif]-->";
 			}
 		}
 
-		if ($this->treeview_enabled)
+		if ($this->treeview_enabled || Kohana::config('config.combine_js'))
 		{
-			$core_js .= html::script($this->js_url."media/js/jquery.treeview");
+			$core_js_combine[] = "media/js/jquery.treeview";
 		}
 
 		if ($this->validator_enabled)
@@ -236,12 +237,12 @@ class Themes_Core {
 			$core_js .= html::script($this->js_url."media/js/coda-slider.pack");
 		}
 
-		if ($this->colorpicker_enabled)
+		if ($this->colorpicker_enabled || Kohana::config('config.combine_js'))
 		{
-			$core_js .= html::script($this->js_url."media/js/colorpicker");
+			$core_js_combine[] = "media/js/colorpicker";
 		}
 
-		$core_js .= html::script($this->js_url."media/js/global");
+		$core_js_combine[] = "media/js/global";
 
 		if ($this->editor_enabled)
 		{
@@ -257,16 +258,29 @@ class Themes_Core {
 			$core_js .= html::script($theme_js,"",true);
 		}
 		
-		$inline_js_content = "function runScheduler(img){img.onload = null;img.src = '".url::site()."scheduler';}"
+		Event::run('ushahidi_filter.header_core_js', $core_js_combine);
+		
+		$inline_js_content = /*"function runScheduler(img){img.onload = null;img.src = '".url::site()."scheduler';}"
 			.'$(document).ready(function(){$(document).pngFix();});'
-			.$this->js;
+			.*/$this->js;
 
 		$inline_js = "<script type=\"text/javascript\"><!--//";
-		$inline_js .= Minify_Js_Driver::minify($inline_js_content);
+		$inline_js .= Kohana::config('config.compress_inline_js') ? Minify_Js_Driver::minify($inline_js_content) : $inline_js_content;
 		$inline_js .= "//--></script>";
 
 		// Filter::header_js - Modify Header Javascript
 		Event::run('ushahidi_filter.header_js', $inline_js);
+		
+		if (Kohana::config('config.combine_js'))
+		{
+			$core_js .= html::script($this->_combine_media($core_js_combine, 'js'),"",FALSE);
+		}
+		else
+		{
+			foreach ($core_js_combine as $file) {
+				$core_js .= html::script($this->js_url.$file,"",true);
+			}
+		}
 
 		return $core_js.$plugin_js.$inline_js;
 	}
