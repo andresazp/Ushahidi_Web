@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * TED Hook - Load All Events
+ * Lite Hooks - Load All Events
  *
  * PHP version 5
  * LICENSE: This source file is subject to LGPL license 
@@ -21,6 +21,7 @@ class lite {
 	{
 		// Hook into routing
 		Event::add('ushahidi_filter.header_core_js', array($this, '_core_js'));
+		Event::add('ushahidi_filter.footer_block', array($this, '_footer_block'));
 	}
 	
 	/**
@@ -53,6 +54,11 @@ class lite {
 				Event::$data[$key] = $replace_js[$file];
 			}
 		}
+	}
+
+	public function _footer_block() {
+		$themes = new Themes();
+		Event::$data = str_replace($themes->scheduler_js(),'',Event::$data);
 	}
 	
 }
