@@ -7,5 +7,8 @@
 [submodule "actionable"]
 	path = plugins/actionable
 	url = git://github.com/ushahidi/Ushahidi-plugin-actionable.git
+[submodule "offline"]
+	path = plugins/offline
+	url = git://github.com/rjmackay/Ushahidi-plugin-offline.git
 
 
