@@ -112,5 +112,8 @@ file { "/etc/apache2/sites-available/ushahidi":
         notify  => Service["apache2"], # TODO check this causes a reload only if changed
 }
 
-
-}
+#@todo disable ssh password login
+#@todo firewall setup
+#@todo authorized keys
+#@todo users
+#@todo sudoers
