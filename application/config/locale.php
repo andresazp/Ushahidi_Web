@@ -7,7 +7,7 @@
  * for OS's that don't support the first (e.g. Windows). The first valid locale in the array will be used.
  * @see http://php.net/setlocale
  */
-$config['language'] = array('en_US', 'English_United States');
+$config['language'] = array('fr_FR', 'French_France');
 
 /**
  * All Available Languages
@@ -19,4 +19,4 @@ $config['all_languages'] = array ( 'en_US'=>'English (US)', 'fr_FR'=>'Français'
  * Locale timezone. Defaults to use the server timezone.
  * @see http://php.net/timezones
  */
-$config['timezone'] = '';
+$config['timezone'] = 'Africa/Bangui';
