@@ -10,5 +10,7 @@
 [submodule "offline"]
 	path = plugins/offline
 	url = git://github.com/rjmackay/Ushahidi-plugin-offline.git
-
+[submodule "adminmap"]
+	path = plugins/adminmap
+	url = git://github.com/jetherton/adminmap.git
 
