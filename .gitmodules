@@ -1,0 +1,11 @@
+[submodule "timespan"]
+	path = plugins/timespan
+	url = git://github.com/jetherton/timespan.git
+[submodule "analysis"]
+	path = plugins/analysis
+	url = git://github.com/ushahidi/Ushahidi-plugin-analysis.git
+[submodule "actionable"]
+	path = plugins/actionable
+	url = git://github.com/ushahidi/Ushahidi-plugin-actionable.git
+
+
