@@ -49,23 +49,8 @@
 		$("select[id^='custom_field_']").val("---NOT_SELECTED---");
 		$("input[id^='custom_field_']:checkbox").removeAttr("checked");
 		$("input[id^='custom_field_']:radio").removeAttr("checked");		
-		  
-		// "Choose Date Range"" Datepicker
-		/*var dates = $( "#report_date_from, #report_date_to" ).datepicker({
-			defaultDate: "+1w",
-			changeMonth: true,
-			numberOfMonths: 1,
-			onSelect: function( selectedDate ) {
-				var option = this.id == "report_date_from" ? "minDate" : "maxDate",
-				instance = $( this ).data( "datepicker" ),
-				date = $.datepicker.parseDate(
-				instance.settings.dateFormat ||
-				$.datepicker._defaults.dateFormat,
-				selectedDate, instance.settings );
-				dates.not( this ).datepicker( "option", option, date );
-			}
-		});*/
-		  
+		
+		
 		/**
 		 * Date range datepicker box functionality
 		 * Show the box when clicking the "change time" link
@@ -539,7 +524,7 @@
 						{
 							switchViews($("#reports-box .report-list-toggle a.map"));
 						}
-
+						
 					}, 400);
 				}
 			}
