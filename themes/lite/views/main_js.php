@@ -702,45 +702,41 @@
 			}
 			
 			//Accessible Slider/Select Switch
-			/*$("select#startDate, select#endDate").selectToUISlider({
-				labels: 4,
-				labelSrc: 'text',
-				sliderOptions: {
-					change: function(e, ui)
+			$("select#startDate, select#endDate").bind({
+				change: function(e, ui)
+				{
+					var startDate = $("#startDate").val();
+					var endDate = $("#endDate").val();
+					var currentCat = gCategoryId;
+					
+					// Get Current Category
+					currCat = currentCat;
+					
+					// Get Current Zoom
+					currZoom = map.getZoom();
+					
+					// Get Current Center
+					currCenter = map.getCenter();
+					
+					// If we're in a month date range, switch to
+					// non-clustered mode. Default interval is monthly
+					var startTime = new Date(startDate * 1000);
+					var endTime = new Date(endDate * 1000);
+					if ((endTime - startTime) / (1000 * 60 * 60 * 24) <?php echo '<'; ?>= 32)
 					{
-						var startDate = $("#startDate").val();
-						var endDate = $("#endDate").val();
-						var currentCat = gCategoryId;
-						
-						// Get Current Category
-						currCat = currentCat;
-						
-						// Get Current Zoom
-						currZoom = map.getZoom();
-						
-						// Get Current Center
-						currCenter = map.getCenter();
-						
-						// If we're in a month date range, switch to
-						// non-clustered mode. Default interval is monthly
-						var startTime = new Date(startDate * 1000);
-						var endTime = new Date(endDate * 1000);
-						if ((endTime - startTime) / (1000 * 60 * 60 * 24) <?php echo '<'; ?>= 32)
-						{
-							json_url = "json";
-						} 
-						else
-						{
-							json_url = default_json_url;
-						}
-						
-						// Refresh Map
-						addMarkers(currCat, startDate, endDate, '', '', gMediaType);
-						
-						refreshGraph(startDate, endDate);
+						json_url = "json";
+					} 
+					else
+					{
+						json_url = default_json_url;
 					}
+					
+					// Refresh Map
+					addMarkers(currCat, startDate, endDate, '', '', gMediaType);
+					
+					refreshGraph(startDate, endDate);
 				}
-			});*/
+			});
 			
 			var startTime = <?php echo $active_startDate ?>;	// Default to most active month
 			var endTime = <?php echo $active_endDate ?>;		// Default to most active month
