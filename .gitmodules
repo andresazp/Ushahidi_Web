@@ -13,4 +13,9 @@
 [submodule "adminmap"]
 	path = plugins/adminmap
 	url = git://github.com/jetherton/adminmap.git
-
+[submodule "downloadreports"]
+	path = plugins/downloadreports
+	url = git://github.com/rjmackay/Ushahidi-plugin-downloadreports.git
+[submodule "kml"]
+	path = plugins/kml
+	url = git://github.com/rjmackay/Ushahidi-plugin-kml.git
