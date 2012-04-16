@@ -219,7 +219,7 @@ jQuery.fn.selectToUISlider = function(settings){
 	//update tooltip arrow inner color
 	sliderComponent.find('.ui-tooltip-pointer-down-inner').each(function(){
 				var bWidth = jQuery('.ui-tooltip-pointer-down-inner').css('borderTopWidth');
-				var bColor = jQuery(this).parents('.ui-slider-tooltip').css('backgroundColor')
+				var bColor = jQuery(this).parents('.ui-slider-tooltip').css('backgroundColor');
 				jQuery(this).css('border-top', bWidth+' solid '+bColor);
 	});
 	
