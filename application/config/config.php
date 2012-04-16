@@ -46,7 +46,7 @@ $config['internal_cache'] = TRUE;
  *
  * Do not enable this option if you are using output compression in php.ini!
  */
-$config['output_compression'] = TRUE;
+$config['output_compression'] = 9;
 
 /**
  * Enable or disable combining core and theme css/js files into 1 optimised file
