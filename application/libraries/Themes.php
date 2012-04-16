@@ -455,7 +455,11 @@ class Themes_Core {
 	*/
 	public function scheduler_js()
 	{
-		return '<!-- Task Scheduler --><script type="text/javascript">$(document).ready(function(){$(\'#schedulerholder\').html(\'<img src="'.url::base().'scheduler" />\');});</script><div id="schedulerholder"></div><!-- End Task Scheduler -->';
+		if (Kohana::config('config.output_scheduler_js'))
+		{
+			return '<!-- Task Scheduler --><script type="text/javascript">$(document).ready(function(){$(\'#schedulerholder\').html(\'<img src="'.url::base().'scheduler" />\');});</script><div id="schedulerholder"></div><!-- End Task Scheduler -->';
+		}
+		return '';
 	}
 
 	/*
