@@ -4,9 +4,10 @@
 Vagrant::Config.run do |config|
   config.vm.box = "ubuntu-1110-server-amd64"
   # config.vm.box_url = "http://domain.com/path/to/above.box"
-  # config.vm.customize ["modifyvm", :id, "--memory", "1024"]
+  config.vm.customize ["modifyvm", :id, "--memory", "512"]
   config.vm.network :hostonly, "192.168.33.11"
   # config.vm.network :bridged
+  # config.vm.forward_port 22, 2200
   # config.vm.forward_port 80, 8080
   config.vm.share_folder "www", "/var/www", "/Users/robbie/www/ushahidi_car", :nfs => true
   # Enable provisioning with Puppet stand alone.  Puppet manifests
