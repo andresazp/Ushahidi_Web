@@ -7,6 +7,7 @@
  * @package    Minify
  * @author     Tom Morton
  * @copyright  (c) 2009 Tom Morton
+ * @license     http://opensource.org/licenses/mit-license.php MIT License
  */
  
 class Minify_Core {
