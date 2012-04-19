@@ -19,3 +19,6 @@
 [submodule "kml"]
 	path = plugins/kml
 	url = git://github.com/rjmackay/Ushahidi-plugin-kml.git
+[submodule "mobile"]
+        path = plugins/mobile
+        url = git://github.com/rjmackay/ushahidi-plugins-mobile.git
