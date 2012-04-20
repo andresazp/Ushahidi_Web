@@ -216,11 +216,6 @@ class Themes_Core {
 		{
 			$core_js .= $this->api_url;
 
-			if ($this->main_page || $this->this_page == "alerts" || Kohana::config('config.combine_js'))
-			{
-				$core_js_combine[] = "media/js/selectToUISlider.jQuery";
-			}
-
 			if ($this->main_page || Kohana::config('config.combine_js'))
 			{
 				$core_js_combine[] = "media/js/jquery.flot";
@@ -296,6 +291,10 @@ class Themes_Core {
 			$core_js .= html::script($this->js_url."media/js/coda-slider.pack");
 		}
 		
+		if ($this->map_enabled && ($this->main_page || $this->this_page == "alerts") )
+		{
+			$core_js .= html::script($this->js_url."media/js/selectToUISlider.jQuery", true);
+		}
 
 		return $core_js.$plugin_js.$inline_js;
 	}

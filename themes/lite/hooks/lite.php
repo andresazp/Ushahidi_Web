@@ -35,7 +35,6 @@ class lite {
 			'media/js/jquery.ui.min',
 			'media/js/jquery.pngFix.pack',
 			'media/js/jquery.timeago',
-			'media/js/selectToUISlider.jQuery',
 			'media/js/jquery.flot'
 		);
 		
