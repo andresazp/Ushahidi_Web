@@ -75,12 +75,17 @@ class Minify_Core {
             if (!file_exists($Kfile))
                 throw new Kohana_404_Exception($Kfile);
             
-            // load the driver
-            $minify = new $driver(file_get_contents($Kfile));
-            
-            // minify the page
-            $cached = $minify->min();
-            
+            if (strpos($file,'min') === FALSE AND strpos($file,'pack') === FALSE)
+            {
+              // load the driver
+              $minify = new $driver(file_get_contents($Kfile));
+              
+              // minify the page
+              $cached = $minify->min();
+            }
+            else {
+              $cached = file_get_contents($Kfile);
+            }
             // set the cache
             $cache->set($this->type.'_'.sha1($file), $cached, array(),Kohana::config('minify.cache_lifetime'));
             
