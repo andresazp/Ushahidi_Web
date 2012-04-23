@@ -207,7 +207,7 @@ class Themes_Core {
 		}
 
 		$core_js_combine[] = "media/js/jquery";
-		$core_js_combine[] = "media/js/jquery.ui.min";
+		$core_js_combine[] = "media/js/jquery-ui-1.8.19.custom.min";
 		//$core_js .= html::script("https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/jquery-ui.min.js", true);
 		$core_js_combine[] = "media/js/jquery.pngFix.pack";
 		$core_js_combine[] = "media/js/jquery.timeago";
