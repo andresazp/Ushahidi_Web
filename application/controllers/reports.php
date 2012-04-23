@@ -169,18 +169,18 @@ class Reports_Controller extends Main_Controller {
 
 		// Swap out category titles with their proper localizations using an array (cleaner way to do this?)
 		$localized_categories = array();
-		foreach ($incidents as $incident)
+		$category_langs = ORM::factory('category_lang')->where('locale',$locale)->select_list('category_id','category_title');
+		$categories = ORM::factory('category')->find_all();
+
+		foreach ($categories as $category)
 		{
-			$incident = ORM::factory('incident', $incident->incident_id);
-			foreach ($incident->category AS $category)
+			$ct = $category->category_title;
+			if ( ! isset($localized_categories[$ct]))
 			{
-				$ct = (string)$category->category_title;
-				if ( ! isset($localized_categories[$ct]))
-				{
-					$localized_categories[$ct] = Category_Lang_Model::category_title($category->id, $locale);
-				}
+				$localized_categories[$ct] = (isset($category_langs[$category->id]) AND $category_langs[$category->id] != '') ? $category_langs[$category->id] : $ct;
 			}
 		}
+		
 		// Set the view content
 		$report_listing->incidents = $incidents;
 		$report_listing->localized_categories = $localized_categories;
