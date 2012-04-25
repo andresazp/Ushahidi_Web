@@ -104,7 +104,7 @@
 		//echo html::script(url::file_loc('js').'media/js/protochart/prototype', true);
 		echo html::script(url::file_loc('js').'media/js/raphael', true);
 		echo '<script type="text/javascript" charset="utf-8">';
-		echo 'var impact_json = { '.$impact_json .' };';
+		echo 'var impact_json = '.$impact_json .';';
 		echo '</script>';
 		echo html::script(url::file_loc('js').'media/js/raphael-ushahidi-impact', true);
 	}
@@ -162,21 +162,29 @@
 			$("#info-search").submit();
 		}
 		function show_addedit(toggle){
+			var csrfToken = $('[name="form_auth_token"]').val();
+			var addEditForm = $("#addedit");
 			if (toggle) {
-				$("#addedit").toggle(400);
+				addEditForm.toggle(400);
 				$(':input','#addedit')
 				 .not(':button, :submit, :reset, #action')
 				 .val('')
 				 .removeAttr('checked')
 				 .removeAttr('selected');
 
-			}else{
-				$("#addedit").show(400);
+			} else {
+				addEditForm.show(400);
 			}
 			$("a.add").focus();
+
+			// Add the CSRF token
+			if (addEditForm != undefined && csrfToken != undefined) {
+				$('[name="form_auth_token"]', addEditForm).val(csrfToken);
+			}
 		}
 		<?php
-		if ($form_error) {
+		if ($form_error)
+		{
 			echo '$(document).ready(function() { $("#addedit").show(); });';
 		}
 		?>
@@ -204,11 +212,11 @@
 			<div class="info-nav">
 				<h3><?php echo Kohana::lang('ui_admin.get_help');?></h3>
 				<ul>
-					<li ><a href="http://wiki.ushahididev.com/"><?php echo Kohana::lang('ui_admin.wiki');?></a></li>
+					<li ><a href="http://wiki.ushahidi.com/"><?php echo Kohana::lang('ui_admin.wiki');?></a></li>
 					<li><a href="http://ushahidi.com/community_resources/"><?php echo Kohana::lang('ui_admin.faqs');?></a></li>
 					<li><a href="http://forums.ushahidi.com/"><?php echo Kohana::lang('ui_admin.forum');?></a></li>
 				</ul>
-				<div class="info-search"><form action="<?php echo url::site() ?>admin/reports" id="info-search"><input type="text" name="k" class="info-keyword" value=""> <a href="javascript:info_search();" class="btn"><?php echo Kohana::lang('ui_admin.search');?></a></form></div>
+				<div class="info-search"><?php echo form::open('admin/reports', array('method' => 'get', 'id' => 'info-search')); ?><input type="text" name="k" class="info-keyword" value=""> <a href="javascript:info_search();" class="btn"><?php echo Kohana::lang('ui_admin.search');?></a><?php echo form::close(); ?></div>
 				<div style="clear:both;"></div>
 				<div class="info-buttons"><a class="button" href="<?php echo url::site().'admin/manage/publiclisting'; ?>">Manage Your <?php echo Kohana::lang('ui_admin.public_listing'); ?></a></div>
 
@@ -242,7 +250,7 @@
 		<div class="holder">
 			<strong>
 				<a href="http://www.ushahidi.com" target="_blank" title="Ushahidi Engine" alt="Ushahidi Engine">
-                	<sup><?php echo Kohana::config('version.ushahidi_version');?></sup>
+                	<sup><?php echo Kohana::config('settings.ushahidi_version');?></sup>
             	</a>
 			</strong>
 		</div>

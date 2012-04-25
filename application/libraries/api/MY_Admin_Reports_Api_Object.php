@@ -18,7 +18,7 @@
 require_once Kohana::find_file('libraries/api', Kohana::config('config.extension_prefix').'Incidents_Api_Object');
 
 class Admin_Reports_Api_Object extends Incidents_Api_Object {
-	
+
 	public function __construct($api_service)
 	{
 		parent::__construct($api_service);
@@ -720,7 +720,6 @@ class Admin_Reports_Api_Object extends Incidents_Api_Object {
 				{
 					ORM::factory('Incident_Person')->where('incident_id', $incident->id)->delete_all();
 					$person = new Incident_Person_Model();
-					$person->location_id = $location->id;
 					$person->incident_id = $incident->id;
 					$person->person_first = $post->person_first;
 					$person->person_last = $post->person_last;

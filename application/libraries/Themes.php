@@ -341,7 +341,7 @@ class Themes_Core {
 		// If we didn't find any languages, we need to look them up and set the cache
 		if( ! $locales)
 		{
-			$locales = locale::get_i18n();
+			$locales = ush_locale::get_i18n();
 			$this->cache->set('locales', $locales, array('locales'), 604800);
 		}
 
@@ -359,7 +359,7 @@ class Themes_Core {
 
 		$languages = "";
 		$languages .= "<div class=\"language-box\">";
-		$languages .= "<form action=\"\">";
+		$languages .= form::open(NULL, array('method' => 'get'));
 
 		/**
 		 * E.Kala - 05/01/2011
@@ -382,7 +382,7 @@ class Themes_Core {
 
 		$languages .= form::dropdown('l', $locales, Kohana::config('locale.language'),
 			' onchange="this.form.submit()" ');
-		$languages .= "</form>";
+		$languages .= form::close();
 		$languages .= "</div>";
 
 		return $languages;
@@ -392,12 +392,12 @@ class Themes_Core {
 	{
 		$search = "";
 		$search .= "<div class=\"search-form\">";
-		$search .= "<form method=\"get\" id=\"search\" action=\"".url::site()."search/\">";
+		$search .= form::open("search", array('method' => 'get', 'id' => 'search'));
 		$search .= "<ul>";
 		$search .= "<li><input type=\"text\" name=\"k\" value=\"\" class=\"text\" /></li>";
 		$search .= "<li><input type=\"submit\" name=\"b\" class=\"searchbtn\" value=\"".Kohana::lang('ui_main.search')."\" /></li>";
 		$search .= "</ul>";
-		$search .= "</form>";
+		$search .= form::close();
 		$search .= "</div>";
 
 		return $search;
@@ -446,6 +446,18 @@ class Themes_Core {
 
 			</script>";
 		}
+
+		// See if we need to disqualify showing the tag on the admin panel
+		if (Kohana::config('config.google_analytics_in_admin') == FALSE
+			AND isset(Router::$segments[0])
+			AND Router::$segments[0] == 'admin')
+		{
+			// Site is configured to not use the google analytics tag in the admin panel
+			//   and we are in the admin panel. Wipe out the tag.
+			$html = '';
+		}
+
+
 		return $html;
 	}
 
