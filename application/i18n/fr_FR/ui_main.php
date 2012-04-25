@@ -1,7 +1,7 @@
 <?php
 	$lang = array(
 	'about' => 'à propos de',
-	'alerts' => 'Recevoir des alertes',
+	'alerts' => 'Alertes',
 	'alerts_alert_me' => 'Alerte-moi si un rapport est déposé dans ou autour de:',
 	'alerts_btn_send' => 'Envoyer',
 	'alerts_email' => 'Adresse Email:',
