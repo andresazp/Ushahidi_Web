@@ -89,7 +89,7 @@
 				<!-- mainmenu -->
 				<div id="mainmenu" class="clearingfix">
 					<ul>
-						<?php nav::main_tabs($this_page, array('reports_submit','contact','home')); ?>
+						<?php nav::main_tabs($this_page, array('reports_submit','contact')); ?>
 					</ul>
 
 				</div>
