@@ -65,7 +65,7 @@ $config['output_compression'] = 9;
  * 
  */
 $config['combine_css'] = TRUE;
-$config['combine_js'] = TRUE;
+$config['combine_js'] = FALSE;
 
 /**
  * Enable or disbale compressing inline JS (ie. main_js)

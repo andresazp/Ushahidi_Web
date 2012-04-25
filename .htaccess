@@ -10,7 +10,7 @@
 	RewriteRule ^(application|modules|system|tests|sql) - [F,L]
 
 	# Send media and theme css/js files to the media controller
-	RewriteRule ^media/(css|js)/.* index.php/$0 [L]
+	#RewriteRule ^media/(css|js)/.* index.php/$0 [L]
 	
 	# Allow any files or directories that exist to be displayed directly
 	RewriteCond %{REQUEST_FILENAME} !-f
