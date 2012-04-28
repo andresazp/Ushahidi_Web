@@ -177,7 +177,6 @@
 										$level_id = $reporter->level_id;
 								        $service = new Service_Model($service_id);
 								        $service_name = $service->service_name;
-							    		$service_userid = $reporter->service_userid;
 							    		$service_account = $reporter->service_account;
 											if ($keyword)
 											{
