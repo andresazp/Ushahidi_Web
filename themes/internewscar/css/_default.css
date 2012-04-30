@@ -205,8 +205,18 @@ div.map { width:auto; border:1px solid #fff; border-top:0; position:relative; }
 #mapStatus { width:auto; float:none; overflow:auto; border:1px solid #fff; }
 
 /* home page timeline */
+div.timeline-holder {
+	background-color: #EEEDEA;
+	border: 1px solid #fff;
+	margin-top: 15px;
+	padding: 10px 11px;
+}
 div.slider-holder,
-div.graph-holder { display:none; }
+div.graph-holder { width: auto; padding: 0; margin: 0; }
+div.slider-holder {
+	margin: 0 0 10px 0;
+	padding: 0 5px;
+}
 
 
 /* home page how to report */

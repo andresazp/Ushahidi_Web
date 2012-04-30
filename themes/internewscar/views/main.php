@@ -254,8 +254,12 @@ $(function(){
 				<?php								
 				// Map and Timeline Blocks
 				echo $div_map;
+				?>
+				<div class="timeline-holder">
+				<?php
 				echo $div_timeline;
 				?>
+				</div>
 			</div>
 		</div>
 		<!-- / content column -->
