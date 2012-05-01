@@ -108,11 +108,20 @@ class Install
 			"	<li><a href=\"http://www.washington.edu/computing/unix/permissions.html\">Unix/Linux</a></li>" .
 			"	<li><a href=\"http://support.microsoft.com/kb/308419\">Windows</a></li>" .
 			"</ul>"
-			/* CB: Commenting this out... I think it's better if we just have them change the permissions of the specific
-				files and folders rather than all the files
-			"Alternatively, you could make the webserver own all the ushahidi files. On unix usually, you" .
-			"issue this command <code>chown -R www-data:ww-data</code>");
-			*/
+			);
+		}
+
+		if( !is_writable('../application/config/encryption.php')) {
+			$form->set_error('encryption_file_perm',
+			"<strong>Oops!</strong> Ushahidi is trying to edit a file called \"" .
+			"encryption.php\" and is unable to do so at the moment. This is probably due to the fact " .
+			"that your permissions aren't set up properly for the <code>encryption.php</code> file. " .
+			"Please change the permissions of that folder to allow write access (777).	" .
+			"<p>Here are instructions for changing file permissions:</p>" .
+			"<ul>" .
+			"	<li><a href=\"http://www.washington.edu/computing/unix/permissions.html\">Unix/Linux</a></li>" .
+			"	<li><a href=\"http://support.microsoft.com/kb/308419\">Windows</a></li>" .
+			"</ul>"
 			);
 		}
 
@@ -394,6 +403,34 @@ class Install
 	}
 
 	/**
+	 * Generate random encryption key and insert into application/config/encryption.php 
+	 */
+	private function _add_encryption_key( )
+	{
+		$config_file = @file('../application/config/encryption.php');
+		$handle = @fopen('../application/config/encryption.php', 'w');
+		
+		$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()_+[]{};:,./?`~';
+		$randomString = '';
+		for ($i = 0; $i < 20; $i++) {
+			$randomString .= $characters[rand(0, strlen($characters) - 1)];
+		}
+		$new_key = $randomString;
+
+		foreach( $config_file as $line_number => $line )
+		{
+			switch( trim($line) ) {
+				case "\$config['default']['key'] = 'USHAHIDI-INSECURE';":
+					fwrite($handle, str_replace("USHAHIDI-INSECURE", $new_key, $line));
+				break;
+
+				default:
+					fwrite($handle, $line);
+			}
+		}
+	}
+
+	/**
 	 * Adds the right RewriteBase entry to the .htaccess file.
 	 *
 	 * @param base_path - the base path.
@@ -648,6 +685,12 @@ class Install
 			"Please change the permissions of that file to allow write access (777).  ");
 		}
 
+		if( !is_writable('../application/config/encryption.php')) {
+			$form->set_error('encryption_file_perm',
+			"<strong>Oops!</strong> Ushahidi is unable to write to <code>application/config/encryption.php</code> file. " .
+			"Please change the permissions of that file to allow write access (777).  ");
+		}
+
 		if( !is_writable('../application/cache')) {
 			$form->set_error('cache_perm',
 			"<strong>Oops!</strong> Ushahidi needs <code>application/cache</code> folder to be writable. ".
@@ -874,6 +917,7 @@ HTML;
 		}
 		else
 		{
+			$this->_add_encryption_key();
 			$this->_add_password_info($password,$table_prefix);
 			$this->_add_email($email,$table_prefix);
 			return 0;
@@ -921,12 +965,13 @@ HTML;
 	 * based on the configured salt pattern.
 	 *
 	 * @param   string  plaintext password
+	 * @param   string  salt for password hash
 	 * @return  string  hashed password string
 	 */
 	public function hash_password($password, $salt = FALSE)
 	{
 		$salt_pattern = array(3, 5, 6, 10, 24, 26, 35, 36, 37, 40);
-		 //array(1, 3, 5, 9, 14, 15, 20, 21, 28, 30);
+		
 		if ($salt === FALSE)
 		{
 			// Create a salt seed, same length as the number of offsets in the pattern

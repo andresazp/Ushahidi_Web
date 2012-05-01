@@ -1272,7 +1272,7 @@ INSERT INTO `service` (`id`, `service_name`, `service_description`, `service_url
  */
 
 CREATE TABLE IF NOT EXISTS `sessions` (
-  `session_id` varchar(40) NOT NULL,
+  `session_id` varchar(127) NOT NULL,
   `last_activity` int(10) unsigned NOT NULL,
   `data` text NOT NULL,
   PRIMARY KEY (`session_id`)
@@ -1448,5 +1448,5 @@ CREATE TABLE IF NOT EXISTS `verified` (
  * Version information for table `settings`
  *
  */
-UPDATE `settings` SET `ushahidi_version` = '2.3' WHERE `id`=1 LIMIT 1;
-UPDATE `settings` SET `db_version` = '86' WHERE `id` = 1 LIMIT 1;
+UPDATE `settings` SET `ushahidi_version` = '2.3.1' WHERE `id`=1 LIMIT 1;
+UPDATE `settings` SET `db_version` = '87' WHERE `id` = 1 LIMIT 1;
