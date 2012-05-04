@@ -30,7 +30,7 @@ class Admin_Reports_Api_Object extends Incidents_Api_Object {
 	public function perform_task()
 	{
 		// Authenticate the user
-		if (!$this->api_service->_login())
+		if (!$this->api_service->_login(TRUE))
 		{
 			$this->set_error_message($this->response(2));
 			return;
