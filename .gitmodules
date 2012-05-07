@@ -22,3 +22,6 @@
 [submodule "mobile"]
         path = plugins/mobile
         url = git://github.com/rjmackay/ushahidi-plugins-mobile.git
+[submodule "restapi"]
+	path = plugins/restapi
+	url = git://github.com/rjmackay/Ushahidi-plugin-restapiv2.git
