@@ -589,7 +589,7 @@ final class Kohana {
 				else
 				{
 					// Cache is invalid, delete it
-					unlink($path);
+					@unlink($path);
 				}
 			}
 		}
