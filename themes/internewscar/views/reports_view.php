@@ -185,6 +185,8 @@
 
 	<div class="right-col">
 
+		<div class="report-print"><a href="#" onclick="window.print(); return false;" class="print">Print this report</a></div>
+
 		<div class="report-media-box-content">
 
 			<div id="report-map" class="report-map">

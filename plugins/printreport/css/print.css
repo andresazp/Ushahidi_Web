@@ -1,0 +1,108 @@
+
+div.report-print {
+  font-weight: bold;
+}
+div.report-print a {
+	/*float: right;
+	background: transparent;*/
+}
+
+@media print {
+  /* remove backgrounds */
+  body {
+    font-size: 12pt;
+  }
+  body a:link:after, body a:visited:after {
+    content: " (" attr(href) ") ";
+    font-size: 90%;
+  }
+  .credibility a:link:after, .credibility a:visited:after,
+  #report-map a:link:after, #report-map a:visited:after,
+  .report-category-list a:link:after, .report-category-list a:visited:after{
+    display: none;
+  }
+  a {
+    color: black;
+    text-decoration: underline;
+  }
+  body#page,
+  div#middle
+   {
+    background: #fff none !important;
+    color: black !important;
+  }
+  /* Hide various page furniture*/
+  #top-bar,
+  header,
+  .submit-incident,
+  #mainmenu,
+  .comment-block,
+  #footer,
+  #oup_15, #odown_15,
+  .report-print {
+    display: none;
+  }
+  div.rapidxwpr {
+    margin: auto;
+    width: 100%;
+    padding: 10px;
+  }
+  div#main {
+    padding: 0;
+  }
+  #main .left-col, #main .right-col {
+    float: none;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    background: transparent none;
+  }
+  .left-col h1.report-title,
+  div.report-additional-reports h4 {
+    float: none;
+    padding: 0;
+    position: relative;
+    top:0; left:0;
+    background: transparent none;
+    color: #000;
+    border: 0;
+  }
+  /*.report-map .map-holder {
+    clear: both;
+    width: 750px;
+    height: 400px;
+    border: 1px solid #C0C2B8;
+    border-bottom: 2px solid #C0C2B8;
+  }*/
+  .olControlPanZoomBar {
+    display: none;
+  }
+  .rating_value {
+    color: black;
+    background: none transparent;
+  }
+  div.action-taken {
+    background:  transparent !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+  #actionable-badge {
+    background: transparent !important;
+    color: black !important;
+  }
+  .report_detail .r_verified {
+    background: #fff;
+    color: black;
+    font-weight: bold;
+  }
+  div.report-category-list a {
+    color: black;
+    background: #fff;
+  }
+  .report-when-where { color: black; }
+  div#logo span { color: black; }
+  div.report-additional-reports { background: transparent  none; padding: 0; margin: 0; }
+  p.r_date { position: relative; padding: 0; }
+  div.report-additional-reports .r_date { background: transparent none; color: black;}
+  div.report-additional-reports p.r_location { color: black; }
+}
