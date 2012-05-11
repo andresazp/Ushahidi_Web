@@ -70,13 +70,13 @@ $config['output_compression'] = 9;
  * Enable or disable combining core and theme css/js files into 1 optimised file
  * 
  */
-$config['combine_css'] = TRUE;
+$config['combine_css'] = FALSE;
 $config['combine_js'] = FALSE;
 
 /**
  * Enable or disbale compressing inline JS (ie. main_js)
  **/
-$config['compress_inline_js'] = TRUE;
+$config['compress_inline_js'] = FALSE;
 
 /**
  * Enable or disable global XSS filtering of GET, POST, and SERVER data. This
