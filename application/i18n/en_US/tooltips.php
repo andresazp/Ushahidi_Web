@@ -83,5 +83,20 @@
 	'settings_site_tagline' => 'In a few words, explain what this site is about.',
 	'settings_site_timezone' => 'This is the timezone that your site will operate on. This has an impact on any actions you have set up that utilize time and date, as well as the default current time for reports on the front and back end of the site.',
 	'settings_twitter_configuration' => 'Set the twitter hashtag that will be used on a tweet',
+	'reports' => array(
+		'reports_title' => 'Example: Sam-Ouandjia needs drinkable water',
+		'reports_description' => 'Detailed description of the report. Include as much detail as possible.',
+		'reports_date' => 'Date the report happened, format: MM/DD/YYYY',
+		'reports_time' => '',
+		'date_time' => 'The date & time the report happened',
+		'reports_categories' => 'Categories are used to sort and process reports. You can select as many as you like.',
+		'reports_optional' => 'Personal information about the reporter. These details will not be made public.',
+		'reports_first' => '',
+		'reports_last' => '',
+		'reports_email' => '',
+		'reports_news' => 'Direct link to news source article. Example: http://www.guardian.co.uk/media/2012/may/10/world-sanitation-issue',
+		'external_video_link' => 'Direct link to a video. Example: http://www.youtube.com/watch?v=Gu1VhsNOwPU',
+		'reports_photos' => 'Attach any photo related to this report',
+	)
 	);
 ?>

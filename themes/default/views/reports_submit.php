@@ -46,11 +46,11 @@
 						</h4>
 					</div>
 					<?php } ?>
-					<h4><?php echo Kohana::lang('ui_main.reports_title'); ?> <span class="required">*</span> </h4>
+					<h4><?php echo Kohana::lang('ui_main.reports_title'); ?> <span class="required">*</span><br /><span class="example"><?php echo Kohana::lang('tooltips.reports.reports_title'); ?></span></h4>
 					<?php print form::input('incident_title', $form['incident_title'], ' class="text long"'); ?>
 				</div>
 				<div class="report_row">
-					<h4><?php echo Kohana::lang('ui_main.reports_description'); ?> <span class="required">*</span> </h4>
+					<h4><?php echo Kohana::lang('ui_main.reports_description'); ?> <span class="required">*</span> <br /><span class="example"><?php echo Kohana::lang('tooltips.reports.reports_description'); ?></span></h4>
 					<?php print form::textarea('incident_description', $form['incident_description'], ' rows="10" class="textarea long" ') ?>
 				</div>
 				<div class="report_row" id="datetime_default">
@@ -62,11 +62,12 @@
 						<?php if($site_timezone != NULL): ?>
 							<small>(<?php echo $site_timezone; ?>)</small>
 						<?php endif; ?>
+						<br /><span class="example"><?php echo Kohana::lang('tooltips.reports.date_time'); ?></span>
 					</h4>
 				</div>
 				<div class="report_row hide" id="datetime_edit">
 					<div class="date-box">
-						<h4><?php echo Kohana::lang('ui_main.reports_date'); ?></h4>
+						<h4><?php echo Kohana::lang('ui_main.reports_date'); ?><br /><span class="example"><?php echo Kohana::lang('tooltips.reports.reports_date'); ?></span></h4>
 						<?php print form::input('incident_date', $form['incident_date'], ' class="text short"'); ?>
 						<script type="text/javascript">
 							$().ready(function() {
@@ -79,7 +80,7 @@
 						</script>
 					</div>
 					<div class="time">
-						<h4><?php echo Kohana::lang('ui_main.reports_time'); ?></h4>
+						<h4><?php echo Kohana::lang('ui_main.reports_time'); ?><br /><span class="example"><?php echo Kohana::lang('tooltips.reports.reports_time'); ?></span></h4>
 						<?php
 							for ($i=1; $i <= 12 ; $i++)
 							{ 
@@ -103,7 +104,7 @@
 					<div style="clear:both; display:block;" id="incident_date_time"></div>
 				</div>
 				<div class="report_row">
-					<h4><?php echo Kohana::lang('ui_main.reports_categories'); ?> <span class="required">*</span></h4>
+					<h4><?php echo Kohana::lang('ui_main.reports_categories'); ?> <span class="required">*</span><br /><span class="example"><?php echo Kohana::lang('tooltips.reports.reports_categories'); ?></span></h4>
 					<div class="report_category" id="categories">
 					<?php
 						$selected_categories = (!empty($form['incident_category']) AND is_array($form['incident_category']))
@@ -127,15 +128,17 @@
 				<div class="report_optional">
 					<h3><?php echo Kohana::lang('ui_main.reports_optional'); ?></h3>
 					<div class="report_row">
-						<h4><?php echo Kohana::lang('ui_main.reports_first'); ?></h4>
+						<h4><span class="example"><?php echo Kohana::lang('tooltips.reports.reports_optional'); ?></span></h4>
+					
+						<h4><?php echo Kohana::lang('ui_main.reports_first'); ?><span class="example"><?php echo Kohana::lang('tooltips.reports.reports_first'); ?></span></h4>
 						<?php print form::input('person_first', $form['person_first'], ' class="text long"'); ?>
 					</div>
 					<div class="report_row">
-						<h4><?php echo Kohana::lang('ui_main.reports_last'); ?></h4>
+						<h4><?php echo Kohana::lang('ui_main.reports_last'); ?><span class="example"><?php echo Kohana::lang('tooltips.reports.reports_last'); ?></span></h4>
 						<?php print form::input('person_last', $form['person_last'], ' class="text long"'); ?>
 					</div>
 					<div class="report_row">
-						<h4><?php echo Kohana::lang('ui_main.reports_email'); ?></h4>
+						<h4><?php echo Kohana::lang('ui_main.reports_email'); ?><span class="example"><?php echo Kohana::lang('tooltips.reports.reports_email'); ?></span></h4>
 						<?php print form::input('person_email', $form['person_email'], ' class="text long"'); ?>
 					</div>
 					<?php
@@ -193,7 +196,7 @@
 
 				<!-- News Fields -->
 				<div id="divNews" class="report_row">
-					<h4><?php echo Kohana::lang('ui_main.reports_news'); ?></h4>
+					<h4><?php echo Kohana::lang('ui_main.reports_news'); ?><br /><span class="example"><?php echo Kohana::lang('tooltips.reports.reports_news'); ?></span></h4>
 					<?php
 						$this_div = "divNews";
 						$this_field = "incident_news";
@@ -230,7 +233,7 @@
 
 				<!-- Video Fields -->
 				<div id="divVideo" class="report_row">
-					<h4><?php echo Kohana::lang('ui_main.external_video_link'); ?></h4>
+					<h4><?php echo Kohana::lang('ui_main.external_video_link'); ?><br /><span class="example"><?php echo Kohana::lang('tooltips.reports.external_video_link'); ?></span></h4>
 					<?php
 						$this_div = "divVideo";
 						$this_field = "incident_video";
@@ -269,7 +272,7 @@
 
 				<!-- Photo Fields -->
 				<div id="divPhoto" class="report_row">
-					<h4><?php echo Kohana::lang('ui_main.reports_photos'); ?></h4>
+					<h4><?php echo Kohana::lang('ui_main.reports_photos'); ?><br /><span class="example"><?php echo Kohana::lang('tooltips.reports.reports_photos'); ?></span></h4>
 					<?php
 						$this_div = "divPhoto";
 						$this_field = "incident_photo";
