@@ -157,7 +157,7 @@ $config['installer_check'] = TRUE;
 /**
  * Output scheduler JS in footer
  */
-$config['output_scheduler_js'] = TRUE;
+$config['output_scheduler_js'] = FALSE;
 
 /**
  * Additional resource paths, or "modules". Each path can either be absolute
