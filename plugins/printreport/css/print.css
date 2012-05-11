@@ -67,13 +67,9 @@ div.report-print a {
     color: #000;
     border: 0;
   }
-  /*.report-map .map-holder {
-    clear: both;
-    width: 750px;
-    height: 400px;
-    border: 1px solid #C0C2B8;
-    border-bottom: 2px solid #C0C2B8;
-  }*/
+   .left-col h1.report-title a{
+   	display:none;
+   }
   .olControlPanZoomBar {
     display: none;
   }
