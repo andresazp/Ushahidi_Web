@@ -29,7 +29,7 @@ class printreport {
 	public function add()
 	{
 		// Only add the events if we are on that controller
-		if (Router::$controller == 'reports' AND Router::$method == 'view')
+		if (Router::$controller == 'reports' AND (Router::$method == 'view' OR Router::$method == 'index'))
 		{
 			plugin::add_stylesheet('printreport/css/print');
 		}
