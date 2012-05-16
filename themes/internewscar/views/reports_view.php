@@ -2,16 +2,7 @@
 
 	<div class="left-col">
 
-  	  <?php
-    	  if ($incident_verified)
-    		{
-    			echo '<p class="r_verified">'.Kohana::lang('ui_main.verified').'</p>';
-    		}
-    		else
-    		{
-    			echo '<p class="r_unverified">'.Kohana::lang('ui_main.unverified').'</p>';
-    		}
-  	  ?>
+  	 
 
 		<h1 class="report-title"><?php
 			echo $incident_title;
@@ -22,6 +13,17 @@
 				echo " [&nbsp;<a href=\"".url::site()."admin/reports/edit/".$incident_id."\">".Kohana::lang('ui_main.edit')."</a>&nbsp;]";
 			}
 		?></h1>
+
+ <?php
+    	  if ($incident_verified)
+    		{
+    			echo '<p class="r_verified">'.Kohana::lang('ui_main.verified').'</p>';
+    		}
+    		else
+    		{
+    			echo '<p class="r_unverified">'.Kohana::lang('ui_main.unverified').'</p>';
+    		}
+  	  ?>
 
 		<p class="report-when-where">
 			<span class="r_date"><?php echo $incident_time.' '.$incident_date; ?> </span>
