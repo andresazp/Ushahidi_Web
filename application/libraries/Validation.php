@@ -392,6 +392,13 @@ class Validation_Core extends ArrayObject {
 		{
 			unset ($this->rules[$csrf_token_key]);
 		}
+		
+		// Don't check CSRF for AJAX requests
+		// Same method as django CSRF protection: http://michael-coates.blogspot.co.nz/2010/12/djangos-built-in-csrf-defense-for-ajax.html
+		if (request::is_ajax())
+		{
+			$validate_csrf = FALSE;
+		}
 
 		// HTTP post no CSRF validation
 		if ($_POST AND $validate_csrf)
