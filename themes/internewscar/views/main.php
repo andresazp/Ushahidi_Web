@@ -200,14 +200,30 @@ $(function(){
 			?>
 			
 			
-			<!-- additional content -->
+			<?php
+			// Action::main_sidebar - Add Items to the Entry Page Sidebar
+			Event::run('ushahidi_action.main_sidebar');
+			?>
+	
+		</div>
+		<!-- / right column -->
+	
+		<!-- content column -->
+		<div id="content" class="clearingfix">
+		  
+
+				<?php								
+				// Map and Timeline Blocks
+				echo $div_map;
+				?>
+				<div class="timeline-holder">
+				<!-- additional content -->
 			<?php
 			if (Kohana::config('settings.allow_reports'))
 			{
 				?>
-				<a class="btn toggle" id="how-to-report-menu-toggle" class="" href="#how-to-report-box"><?php echo Kohana::lang('ui_main.how_to_report'); ?> <span class="btn-icon ic-question">&raquo;</span></a>
-				<div id="how-to-report-box" class="map-menu-box">
-					
+				<div id="how-to-report-box">
+					<h3><?php echo Kohana::lang('ui_main.how_to_report'); ?></h3>
 					<div>
 
 						<!-- Phone -->
@@ -264,28 +280,13 @@ $(function(){
 				</div>
 			<?php } ?>
 			<!-- / additional content -->
-			
-			<?php
-			// Action::main_sidebar - Add Items to the Entry Page Sidebar
-			Event::run('ushahidi_action.main_sidebar');
-			?>
-	
-		</div>
-		<!-- / right column -->
-	
-		<!-- content column -->
-		<div id="content" class="clearingfix">
-		  
-
-				<?php								
-				// Map and Timeline Blocks
-				echo $div_map;
-				?>
-				<div class="timeline-holder">
+				
 				<?php
 				echo $div_timeline;
 				?>
+				<div style="clear:both;"></div>
 				</div>
+				
 			</div>
 		</div>
 		<!-- / content column -->
