@@ -221,7 +221,7 @@ class Main_Controller extends Template_Controller {
 					// Check for localization of child category
 					$display_title = Category_Lang_Model::category_title($child->id,$l);
 
-					$ca_img = ($child->category_image != NULL) ? url::convert_uploaded_to_abs($child->category_image) : NULL;
+					$ca_img = ($child->category_image != NULL) ? url::convert_uploaded_to_abs($child->category_image_thumb) : NULL;
 					$children[$child->id] = array(
 						$display_title,
 						$child->category_color,
@@ -234,7 +234,7 @@ class Main_Controller extends Template_Controller {
 			$display_title = Category_Lang_Model::category_title($category->id,$l);
 
 			// Put it all together
-			$ca_img = ($category->category_image != NULL) ? url::convert_uploaded_to_abs($category->category_image) : NULL;
+			$ca_img = ($category->category_image != NULL) ? url::convert_uploaded_to_abs($category->category_image_thumb) : NULL;
 			$parent_categories[$category->id] = array(
 				$display_title,
 				$category->category_color,
@@ -270,7 +270,7 @@ class Main_Controller extends Template_Controller {
 		if (Kohana::config('settings.default_map_all_icon_id'))
 		{
 			$icon_object = ORM::factory('media')->find(Kohana::config('settings.default_map_all_icon_id'));
-			$this->template->content->default_map_all_icon = Kohana::config('upload.relative_directory')."/".$icon_object->media_medium;
+			$this->template->content->default_map_all_icon = Kohana::config('upload.relative_directory')."/".$icon_object->media_thumb;
 		}
 
 		// Get Twitter Hashtags
