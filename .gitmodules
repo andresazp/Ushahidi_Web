@@ -4,7 +4,8 @@
 	url = git://github.com/rjmackay/timespan.git
 [submodule "analysis"]
 	path = plugins/analysis
-	url = git://github.com/ushahidi/Ushahidi-plugin-analysis.git
+#	url = git://github.com/ushahidi/Ushahidi-plugin-analysis.git
+	url = git://github.com/rjmackay/Ushahidi-plugin-analysis.git
 [submodule "actionable"]
 	path = plugins/actionable
 	url = git://github.com/ushahidi/Ushahidi-plugin-actionable.git
