@@ -13,7 +13,7 @@ $(function(){
       $(this).removeClass("active-toggle");
     }
   );
-  $("a.filter-toggle").click(function() {
+  /*$("a.filter-toggle").click(function() {
     if ($(this).hasClass('active-filter-toggle'))
     {
       $($(this).attr("href")).removeClass('active-filter').slideUp();
@@ -27,7 +27,7 @@ $(function(){
       $(this).addClass("active-filter-toggle");
     }
     return false;
-  });
+  });*/
 });
 
 </script>
@@ -50,7 +50,7 @@ $(function(){
 	    
 	      
         <!-- report category filters -->
-    		<h3><a href="#report-category-filter" class="active-filter-toggle filter-toggle"><?php echo Kohana::lang('ui_main.category');?></a></h3>
+    		<h3><?php echo Kohana::lang('ui_main.category');?></h3>
         <div id="report-category-filter" class="active-filter">
 			
     			<ul id="category_switch" class="category-filters">
@@ -82,7 +82,7 @@ $(function(){
     						}
     						echo '<li><a href="#" id="cat_'. $category .'"><span '.$color_css.'>'.$category_image.'</span><span class="category-title">'.$category_title.'</span></a>';
     						// Get Children
-    						echo '<div class="hide" id="child_'. $category .'">';
+    						echo '<div id="child_'. $category .'">';
                                                     if( sizeof($category_info[3]) != 0)
                                                     {
                                                         echo '<ul>';
@@ -112,8 +112,8 @@ $(function(){
 			  <!-- / report category filters -->
 			  
   			<!-- report type filters -->
-  			<h3><a href="#report-type-filter" class="filter-toggle"><?php echo Kohana::lang('ui_main.type'); ?></a></h3>
-				<div class="filters" id="report-type-filter">
+  			<h3><?php echo Kohana::lang('ui_main.type'); ?></h3>
+				<div class="filters active-filter" id="report-type-filter">
   					<ul>
   						<li><a id="media_0" class="active" href="#"><span><?php echo Kohana::lang('ui_main.reports'); ?></span></a></li>
   						<li><a id="media_4" href="#"><span><?php echo Kohana::lang('ui_main.news'); ?></span></a></li>
@@ -130,8 +130,8 @@ $(function(){
 					</div>-->
 				</div>
 				
-				<h3><a href="#actionable-filters" class="filter-toggle">Actionable</a></h3>
-  			<div class="filters" id="actionable-filters">
+				<h3>Actionable</h3>
+  			<div class="filters active-filter" id="actionable-filters">
   				
 					<ul>
 						<li><a id="media_101" href="#"><span>All</span></a></li>

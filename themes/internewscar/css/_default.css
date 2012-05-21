@@ -144,7 +144,10 @@ div#mainmenu ul li a:hover, div#mainmenu a.active {
 /* filter box */
 #report-map-filter-box { position:absolute; z-index:1000; }
 
-
+div.green-box {
+	margin: 0 0 15px 0;
+	padding: 9px 0 8px;
+}
 
 div#right { position:absolute; z-index:1000; }
 
@@ -160,16 +163,16 @@ div#right { position:absolute; z-index:1000; }
 #the-filters { 
 	position: absolute;
 	overflow: auto;
-  top:0; left:745px;
-  width:193px;
-  height: 366px;
+  top:0; left:695px;
+  width:243px;
+  height: 566px;
   padding: 0;
   background: #EEEDEA;
   border: 1px solid white;
   opacity: 0.9;
 }
 
-#the-filters h3 { font-size:12px;  text-transform:uppercase; margin: 0;}
+#the-filters h3 { font-size:12px;  text-transform:uppercase; margin: 0; padding: 5px; }
 #the-filters h2 { font-size:14px;  text-transform:uppercase; padding: 5px;}
 
   /* home page category filter */
@@ -184,9 +187,9 @@ div#right { position:absolute; z-index:1000; }
   .page-main ul.category-filters li a.active { background:none; border:1px solid #c2c2c2; color:inherit; }
   
   /* home page report type filters */
-  #report-type-filter { overflow:auto; padding:5px; margin:0; display: none;} 
+  #report-type-filter { overflow:auto; padding:5px; margin:0; } 
   div.filters ul li { float:none; margin-bottom:2px; display:block; overflow:auto; }
-  div.filters ul li a { color:#000; font-weight:bold; padding:3px 5px 2px; font-size:12px; display:block; float:left; border:1px transparent solid; }
+  div.filters ul li a { color:#3f3f3f; font-weight:bold; padding:3px 5px 2px; font-size:12px; display:block; float:left; border:1px transparent solid; }
   div.filters ul li a span { font-size:12px; }
   div.filters ul li a:hover, div.filters ul li a.active { -moz-border-radius: 3px; -webkit-border-radius: 3px; display:block; float:left; padding:3px 5px 2px; background:none; border:1px solid #c2c2c2; color:inherit; }
 
@@ -211,7 +214,7 @@ div#right { position:absolute; z-index:1000; }
   #how-to-report-menu-toggle { position:absolute; top:20px; left:780px; width:100px; display: none;}
   
   #kml_switch,
-  #sharing_switch { display:none; position:absolute; top:49px; padding:5px; left:220px; background:#f9f7f8; width:175px;}
+  #sharing_switch {  position:absolute; top:49px; padding:5px; left:220px; background:#f9f7f8; width:175px;}
   #sharing_switch { left:322px; }
   #how-to-report-box { float: right;
 		float: right;
@@ -224,11 +227,11 @@ div#right { position:absolute; z-index:1000; }
 		#how-to-report-box h3 { font-size: 14px; }
     #how-to-report-box ol { margin-left:22px; }
     #how-to-report-box ol li { margin-bottom:5px; }
-  #actionable-filters {display:none; padding:5px; margin: 0;}
+  #actionable-filters { padding:5px; margin: 0;}
   
 
 /* home page map */
-div.map { width:auto; border:1px solid #fff; border-top:0; position:relative; }
+div.map { width:auto; border:1px solid #fff; border-top:0; position:relative; height: 566px; }
 #mapStatus { width:auto; float:none; overflow:auto; border:1px solid #fff; }
 
 /* home page timeline */
