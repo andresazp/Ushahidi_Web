@@ -361,17 +361,7 @@ class Reports_Controller extends Main_Controller {
 				// STEP 6: SAVE PERSONAL INFORMATION
 				reports::save_personal_info($post, $incident);
 
-				// Action::report_add/report_submit - Added a New Report
-				//++ Do we need two events for this? Or will one suffice?
-				//ETHERTON: Yes. Those of us who often write plugins for
-				//Ushahidi would like to have access to the $post arrays
-				//and the report object. Back in the day we even had access
-				//to the $post object, so if our plugins didn't get the
-				//appropriate input we could raise an error, but alas,
-				//those days are gone. Now I suppose you could do something
-				//like Event::run('ushahidi_action.report_add', array($post, $incident));
-				//but for the sake of backward's compatibility, please don't
-				//Thanks.
+				// Run evnets
 				Event::run('ushahidi_action.report_submit', $post);
 				Event::run('ushahidi_action.report_add', $incident);
 
@@ -905,19 +895,28 @@ class Reports_Controller extends Main_Controller {
 
 		if (isset($_POST['address']) AND ! empty($_POST['address']))
 		{
-			$geocode = map::geocode($_POST['address']);
-			if ($geocode)
+			$geocode_result = map::geocode($_POST['address']);
+			if ($geocode_result)
 			{
-				echo json_encode(array("status"=>"success", "message"=>array($geocode['lat'], $geocode['lon'])));
+				echo json_encode(array_merge(
+					$geocode_result, 
+					array('status' => 'success')
+				));
 			}
 			else
 			{
-				echo json_encode(array("status"=>"error", "message"=>"ERROR!"));
+				echo json_encode(array(
+					'status' => 'error',
+					'message' =>'ERROR!'
+				));
 			}
 		}
 		else
 		{
-			echo json_encode(array("status"=>"error", "message"=>"ERROR!"));
+			echo json_encode(array(
+				'status' => 'error',
+				'message' => 'ERROR!'
+			));
 		}
 	}
 

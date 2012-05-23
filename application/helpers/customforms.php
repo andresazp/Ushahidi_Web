@@ -44,6 +44,9 @@ class customforms_Core {
 			}
 		}
 
+		//Get user role_id
+		
+		$role_id = self::user_role();	
 		// Database table prefix
 		$table_prefix = Kohana::config('database.default.table_prefix');
 
@@ -58,11 +61,13 @@ class customforms_Core {
 		
 		if ($form_id != null AND $form_id != '')
 		{
-			$sql .= "AND ff.form_id = ".$form_id." ";
+			$sql .= "AND ff.form_id = ".$form_id. " AND ff.field_ispublic_submit = ".$role_id." OR
+			ff.field_ispublic_visible = ".$role_id." ";
 		}
 		
 		$sql .= "AND ff.field_ispublic_visible ".$public_state." "
 				. "ORDER BY ff.field_position ASC";
+
 
 		// Execute the SQL to fetch the custom form fields
 		$form_fields = Database::instance()->query($sql);
@@ -108,7 +113,8 @@ class customforms_Core {
 
 			if ($form_id != null AND $form_id != '')
 			{
-				$sql .= "AND ff.form_id = ".$form_id." ";
+				$sql .= "AND ff.form_id = ".$form_id. " AND ff.field_ispublic_submit = ".$role_id." OR
+				ff.field_ispublic_visible = ".$role_id." ";
 			}
 			
 			$sql .=	"AND ff.field_ispublic_visible ".$public_state." "
@@ -150,6 +156,34 @@ class customforms_Core {
 
 		// Return
 		return $fields_array;
+	}
+
+	/**
+	* Checks the role of a user using their user_id
+	*/
+	public static function user_role()
+	{
+		if(isset($_SESSION['auth_user']))
+		{
+			$user = $_SESSION['auth_user'];
+
+			$user_id = $user->id;
+
+			//Get the role a user is assigned to
+			$db = Database::instance(); 
+			    
+			$roles = $db->query("SELECT role_id From roles_users WHERE user_id = ? AND role_id != ? ",$user_id,1);
+
+			foreach($roles as $role)
+			{
+				return $role_id = $role->role_id;
+			}
+		}
+		else
+		{
+			return 0;	
+		}
+		
 	}
 
 	/**

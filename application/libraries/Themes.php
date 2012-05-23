@@ -214,6 +214,7 @@ class Themes_Core {
 
 		if ($this->map_enabled || Kohana::config('config.combine_js'))
 		{
+
 			$core_js .= $this->api_url;
 
 			if ($this->main_page || Kohana::config('config.combine_js'))
@@ -461,22 +462,32 @@ class Themes_Core {
 		return $html;
 	}
 
-	/*
-	* Scheduler JS Call
-	*/
+	/**
+	 * Scheduler JS Call
+	 *
+	 * @return string
+	 */
 	public function scheduler_js()
 	{
 		if (Kohana::config('config.output_scheduler_js'))
 		{
-			return '<!-- Task Scheduler --><script type="text/javascript">$(document).ready(function(){$(\'#schedulerholder\').html(\'<img src="'.url::base().'scheduler" />\');});</script><div id="schedulerholder"></div><!-- End Task Scheduler -->';
+			return '<!-- Task Scheduler -->'
+			    . '<script type="text/javascript">'
+			    . 'jQuery(document).ready(function(){'
+			    . '	jQuery(\'#schedulerholder\').html(\'<img src="'.url::base().'scheduler" />\');'
+			    . '});'
+                . '</script>'
+                . '<div id="schedulerholder"></div>'
+                . '<!-- End Task Scheduler -->';
 		}
 		return '';
 	}
 
 	/*
 	* CDN Gradual Upgrade JS Call
-	*   This upgrader pushes files from local server to the CDN in a gradual fashion so there doesn't need to
-	*   be any downtime when a deployer makes the switch to a CDN
+	*   This upgrader pushes files from local server to the CDN in a gradual
+	*   fashion so there doesn't need to be any downtime when a deployer makes
+	*   the switch to a CDN
 	*/
 	public function cdn_gradual_upgrade()
 	{
@@ -489,7 +500,8 @@ class Themes_Core {
 
 	/*
 	* Ushahidi Stats JS Call
-	*    If a deployer is using Ushahidi to track their stats, this is the JS call for that
+	*    If a deployer is using Ushahidi to track their stats, this is the JS
+	*    call for that
 	*/
 	public function ushahidi_stats_js()
 	{

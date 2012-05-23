@@ -15,6 +15,7 @@
  */
 
 class Reports_Controller extends Admin_Controller {
+
 	public function __construct()
 	{
 		parent::__construct();
@@ -106,7 +107,8 @@ class Reports_Controller extends Admin_Controller {
 			 //	Add some filters
 			$post->pre_filter('trim', TRUE);
 
-			// Add some rules, the input field, followed by a list of checks, carried out in order
+			// Add some rules, the input field, followed by a list of checks,
+			// carried out in order
 			$post->add_rules('action','required', 'alpha', 'length[1,1]');
 			$post->add_rules('incident_id.*','required','numeric');
 
@@ -121,18 +123,22 @@ class Reports_Controller extends Admin_Controller {
 						$db = new Database();
 
 						// Query to check if this report is uncategorized i.e categoryless
-						$query = "SELECT ic.* FROM ".$table_prefix."incident_category ic
-								INNER JOIN ".$table_prefix."category c ON c.id = ic.category_id INNER JOIN ".$table_prefix."incident i ON i.id=ic.incident_id
-								WHERE c.category_title =\"NONE\" AND c.category_trusted = '1' AND ic.incident_id = $item";
+						$query = "SELECT ic.* FROM ".$table_prefix."incident_category ic "
+						    . "INNER JOIN ".$table_prefix."category c ON c.id = ic.category_id "
+						    . "INNER JOIN ".$table_prefix."incident i ON i.id=ic.incident_id "
+						    . "WHERE c.category_title =\"NONE\" AND c.category_trusted = '1' "
+						    . "AND ic.incident_id = $item";
+
 						$result = $db->query($query);
 
-						// Only approve the report IF it's not uncategorized i.e the query returns a null set
-						if(count($result) == 0)
+						// Only approve the report IF it's not uncategorized
+						// i.e the query returns a null set
+						if (count($result) == 0)
 						{
 							$update = new Incident_Model($item);
 							if ($update->loaded == TRUE)
 							{
-								$update->incident_active =($update->incident_active == 0) ? '1' : '0';
+								$update->incident_active = ($update->incident_active == 0) ? '1' : '0';
 
 								// Tag this as a report that needs to be sent out as an alert
 								if ($update->incident_alert_status != '2')
@@ -216,6 +222,7 @@ class Reports_Controller extends Admin_Controller {
 							$update->save();
 
 							$verify->incident_id = $item;
+
 							// Record 'Verified By' Action
 							$verify->user_id = $_SESSION['auth_user']->id;
 							$verify->verified_date = date("Y-m-d H:i:s",time());
@@ -230,52 +237,12 @@ class Reports_Controller extends Admin_Controller {
 				// Delete Action
 				elseif ($post->action == 'd')
 				{
-					foreach($post->incident_id as $item)
+					foreach ($post->incident_id as $item)
 					{
 						$update = new Incident_Model($item);
-						if ($update->loaded == TRUE)
+						if ($update->loaded)
 						{
-							$incident_id = $update->id;
-							$location_id = $update->location_id;
 							$update->delete();
-
-							// Delete Location
-							ORM::factory('location')->where('id',$location_id)->delete_all();
-
-							// Delete Categories
-							ORM::factory('incident_category')->where('incident_id',$incident_id)->delete_all();
-
-							// Delete Translations
-							ORM::factory('incident_lang')->where('incident_id',$incident_id)->delete_all();
-
-							// Delete Photos From Directory
-							foreach (ORM::factory('media')->where('incident_id',$incident_id)->where('media_type', 1) as $photo)
-							{
-								deletePhoto($photo->id);
-							}
-
-							// Delete Media
-							ORM::factory('media')->where('incident_id',$incident_id)->delete_all();
-
-							// Delete Sender
-							ORM::factory('incident_person')->where('incident_id',$incident_id)->delete_all();
-
-							// Delete relationship to SMS message
-							$updatemessage = ORM::factory('message')->where('incident_id',$incident_id)->find();
-							if ($updatemessage->loaded == TRUE)
-							{
-								$updatemessage->incident_id = 0;
-								$updatemessage->save();
-							}
-							
-							// Delete Comments
-							ORM::factory('comment')->where('incident_id',$incident_id)->delete_all();
-
-							// Delete form responses
-							ORM::factory('form_response')->where('incident_id', $incident_id)->delete_all();
-
-							// Action::report_delete - Deleted a Report
-							Event::run('ushahidi_action.report_delete', $incident_id);
 						}
 					}
 					$form_action = strtoupper(Kohana::lang('ui_admin.deleted'));
@@ -340,7 +307,7 @@ class Reports_Controller extends Admin_Controller {
 		$this->template->content = new View('admin/reports_edit');
 		$this->template->content->title = Kohana::lang('ui_admin.create_report');
 
-		// setup and initialize form field names
+		// Setup and initialize form field names
 		$form = array(
 			'location_id' => '',
 			'form_id' => '1',
@@ -370,7 +337,8 @@ class Reports_Controller extends Admin_Controller {
 			'incident_zoom' => ''
 		);
 
-		// Copy the form as errors, so the errors will be stored with keys corresponding to the form field names
+		// Copy the form as errors, so the errors will be stored with keys
+		// corresponding to the form field names
 		$errors = $form;
 		$form_error = FALSE;
 		$form_saved = ($saved == 'saved');
@@ -405,7 +373,7 @@ class Reports_Controller extends Admin_Controller {
 		$this->template->content->locale_array = Kohana::config('locale.all_languages');
 
 		// Create Categories
-		$this->template->content->categories = Category_Model::get_categories(0, TRUE, FALSE);
+		$this->template->content->categories = Category_Model::get_categories(0, FALSE, FALSE);
 		$this->template->content->new_categories_form = $this->_new_categories_form_arr();
 
 		// Time formatting
@@ -428,7 +396,8 @@ class Reports_Controller extends Admin_Controller {
 			$countries[$country->id] = $this_country;
 		}
 
-		// Initialize Default Value for Hidden Field Country Name, just incase Reverse Geo coding yields no result
+		// Initialize Default Value for Hidden Field Country Name, 
+		// just incase Reverse Geo coding yields no result
 		$form['country_name'] = $countries[$form['country_id']];
 		$this->template->content->countries = $countries;
 
@@ -518,12 +487,12 @@ class Reports_Controller extends Admin_Controller {
 			else
 			{
 				$message_id = "";
-				$this->template->content->show_messages = false;
+				$this->template->content->show_messages = FALSE;
 			}
 		}
 		else
 		{
-			$this->template->content->show_messages = false;
+			$this->template->content->show_messages = FALSE;
 		}
 
 		// Are we creating this report from a Newsfeed?
@@ -668,7 +637,8 @@ class Reports_Controller extends Admin_Controller {
 				Event::run('ushahidi_action.report_edit', $incident);
 
 				// SAVE AND CLOSE?
-				switch($post->save) {
+				switch ($post->save)
+				{
 					case 1:
 					case 'dontclose':
 						// Save but don't close
@@ -1414,54 +1384,6 @@ class Reports_Controller extends Admin_Controller {
 		else
 		{
 			echo json_encode(array("status"=>"error"));
-		}
-	}
-
-	/**
-	* Delete Photo
-	* @param int $id The unique id of the photo to be deleted
-	*/
-	public function deletePhoto ($id)
-	{
-		$this->auto_render = FALSE;
-		$this->template = "";
-
-		if ($id)
-		{
-			$photo = ORM::factory('media', $id);
-			$photo_large = $photo->media_link;
-			$photo_medium = $photo->media_medium;
-			$photo_thumb = $photo->media_thumb;
-
-			if (file_exists(Kohana::config('upload.directory', TRUE).$photo_large))
-			{
-				unlink(Kohana::config('upload.directory', TRUE).$photo_large);
-			}
-			elseif (Kohana::config("cdn.cdn_store_dynamic_content") AND valid::url($photo_large))
-			{
-				cdn::delete($photo_large);
-			}
-
-			if (file_exists(Kohana::config('upload.directory', TRUE).$photo_medium))
-			{
-				unlink(Kohana::config('upload.directory', TRUE).$photo_medium);
-			}
-			elseif (Kohana::config("cdn.cdn_store_dynamic_content") AND valid::url($photo_medium))
-			{
-				cdn::delete($photo_medium);
-			}
-
-			if (file_exists(Kohana::config('upload.directory', TRUE).$photo_thumb))
-			{
-				unlink(Kohana::config('upload.directory', TRUE).$photo_thumb);
-			}
-			elseif (Kohana::config("cdn.cdn_store_dynamic_content") AND valid::url($photo_thumb))
-			{
-				cdn::delete($photo_thumb);
-			}
-
-			// Finally Remove from DB
-			$photo->delete();
 		}
 	}
 

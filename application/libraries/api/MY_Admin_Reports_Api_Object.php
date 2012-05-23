@@ -30,7 +30,7 @@ class Admin_Reports_Api_Object extends Incidents_Api_Object {
 	public function perform_task()
 	{
 		// Authenticate the user
-		if (!$this->api_service->_login(TRUE))
+		if ( ! $this->api_service->_login(TRUE))
 		{
 			$this->set_error_message($this->response(2));
 			return;
@@ -79,12 +79,14 @@ class Admin_Reports_Api_Object extends Incidents_Api_Object {
 					break;
 
 				default :
-					$this->set_error_message(array("error" => $this->api_service->get_error_msg(002)));
+					$this->set_error_message(array(
+						"error" => $this->api_service->get_error_msg(002)
+					));
 			}
 			return;
 		}
 
-		//action request
+		// action request
 		else if ($this->api_service->verify_array_index($this->request, 'action'))
 		{
 			$this->report_action();
@@ -108,16 +110,18 @@ class Admin_Reports_Api_Object extends Incidents_Api_Object {
 		// Will hold the ID of the incident/report to be acted upon
 
 		// Authenticate the user
-		if (!$this->api_service->_login())
+		if ( ! $this->api_service->_login())
 		{
 			$this->set_error_message($this->response(2));
 			return;
 		}
 
 		// Check if the action has been specified
-		if (!$this->api_service->verify_array_index($this->request, 'action'))
+		if ( ! $this->api_service->verify_array_index($this->request, 'action'))
 		{
-			$this->set_error_message(array("error" => $this->api_service->get_error_msg(001, 'action')));
+			$this->set_error_message(array(
+				"error" => $this->api_service->get_error_msg(001, 'action')
+			));
 
 			return;
 		}
@@ -150,7 +154,9 @@ class Admin_Reports_Api_Object extends Incidents_Api_Object {
 				break;
 
 			default :
-				$this->set_error_message(array("error" => $this->api_service->get_error_msg(002)));
+				$this->set_error_message(array(
+					"error" => $this->api_service->get_error_msg(002)
+				));
 		}
 	}
 
@@ -227,7 +233,6 @@ class Admin_Reports_Api_Object extends Incidents_Api_Object {
 	public function _edit_report()
 	{
 		print $this->_submit_report();
-
 	}
 
 	/**
@@ -255,51 +260,14 @@ class Admin_Reports_Api_Object extends Incidents_Api_Object {
 			// of checks, carried out in order
 			$post->add_rules('incident_id', 'required', 'numeric');
 
-			if ($post->validate())
+			if ($post->validate(FALSE))
 			{
 				$incident_id = $post->incident_id;
 				$update = new Incident_Model($incident_id);
 
-				if ($update->loaded == true)
+				if ($update->loaded)
 				{
-					//$incident_id = $update->id;
-					$location_id = $update->location_id;
 					$update->delete();
-
-					// Delete Location
-					ORM::factory('location')->where('id', $location_id)->delete_all();
-
-					// Delete Categories
-					ORM::factory('incident_category')->where('incident_id', $incident_id)->delete_all();
-
-					// Delete Translations
-					ORM::factory('incident_lang')->where('incident_id', $incident_id)->delete_all();
-
-					// Delete Photos From Directory
-					foreach (ORM::factory('media')->where('incident_id',
-					$incident_id)->where('media_type', 1) as $photo)
-					{
-						$this->delete_photo($photo->id);
-					}
-
-					// Delete Media
-					ORM::factory('media')->where('incident_id', $incident_id)->delete_all();
-
-					// Delete Sender
-					ORM::factory('incident_person')->where('incident_id', $incident_id)->delete_all();
-
-					// Delete relationship to SMS message
-					$updatemessage = ORM::factory('message')->where('incident_id', $incident_id)->find();
-
-					if ($updatemessage->loaded == true)
-					{
-						$updatemessage->incident_id = 0;
-						$updatemessage->save();
-					}
-
-					// Delete Comments
-					ORM::factory('comment')->where('incident_id', $incident_id)->delete_all();
-
 				}
 			}
 			else
@@ -490,247 +458,79 @@ class Admin_Reports_Api_Object extends Incidents_Api_Object {
 	private function _submit_report()
 	{
 		// setup and initialize form field names
-		$form = array('location_id' => '', 'incident_id' => '', 'incident_title' => '', 'incident_description' => '', 'incident_date' => '', 'incident_hour' => '', 'incident_minute' => '', 'incident_ampm' => '', 'latitude' => '', 'longitude' => '', 'location_name' => '', 'country_id' => '', 'incident_category' => '', 'incident_news' => array(), 'incident_video' => array(), 'incident_photo' => array(), 'person_first' => '', 'person_last' => '', 'person_email' => '', 'incident_active ' => '', 'incident_verified' => '');
+		$form = array(
+		    'location_id' => '',
+		    'incident_id' => '',
+		    'incident_title' => '',
+		    'incident_description' => '',
+		    'incident_date' => '',
+		    'incident_hour' => '',
+		    'incident_minute' => '',
+		    'incident_ampm' => '',
+		    'latitude' => '',
+		    'longitude' => '',
+		    'location_name' => '',
+		    'country_id' => '',
+		    'incident_category' => '',
+		    'incident_news' => array(),
+		    'incident_video' => array(),
+		    'incident_photo' => array(),
+		    'person_first' => '',
+		    'person_last' => '',
+		    'person_email' => '',
+		    'incident_active ' => '',
+		    'incident_verified' => ''
+		);
 
 		$errors = $form;
 
 		// check, has the form been submitted, if so, setup validation
 		if ($_POST)
 		{
-			// Instantiate Validation, use $post, so we don't overwrite $_POST fields with our own things
-			$post = Validation::factory(array_merge($_POST, $_FILES));
+			// Instantiate Validation, use $post, so we don't overwrite 
+			// $_POST fields with our own things
+			$post = array_merge($_POST, $_FILES);
+			$post['incident_category'] = explode(',', $post['incident_category']);
 
-			//  Add some filters
-			$post->pre_filter('trim', TRUE);
-
-			// Add some rules, the input field, followed by a list of
-			//checks, carried out in order
-			$post->add_rules('location_id', 'numeric');
-			$post->add_rules('incident_id', 'required', 'numeric');
-			$post->add_rules('incident_title', 'required', 'length[3,200]');
-			$post->add_rules('incident_description', 'required');
-			$post->add_rules('incident_date', 'required', 'date_mmddyyyy');
-			$post->add_rules('incident_hour', 'required', 'between[0,23]');
-
-			if ($this->api_service->verify_array_index($_POST, 'incident_ampm'))
-			{
-				if ($_POST['incident_ampm'] != "am" && $_POST['incident_ampm'] != "pm")
-				{
-					$post->add_error('incident_ampm', 'values');
-				}
-			}
-
-			$post->add_rules('latitude', 'required', 'between[-90,90]');
-			$post->add_rules('longitude', 'required', 'between[-180,180]');
-			$post->add_rules('location_name', 'required', 'length[3,200]');
-			$post->add_rules('incident_category', 'required', 'length[1,100]');
-
-			// Validate Personal Information
-			if (!empty($post->person_first))
-			{
-				$post->add_rules('person_first', 'length[3,100]');
-			}
-
-			if (!empty($post->person_last))
-			{
-				$post->add_rules('person_last', 'length[3,100]');
-			}
-
-			if (!empty($post->person_email))
-			{
-				$post->add_rules('person_email', 'email', 'length[3,100]');
-			}
-
-			$post->add_rules('incident_active', 'required', 'between[0,1]');
-			$post->add_rules('incident_verified', 'required', 'length[0,1]');
+			// Action::report_submit_admin - Report Posted
+			Event::run('ushahidi_action.report_submit_admin', $post);
 
 			// Test to see if things passed the rule checks
-			if ($post->validate())
+			if (reports::validate($post, TRUE))
 			{
-				$incident_id = $post->incident_id;
+				// Yes! everything is valid
 				$location_id = $post->location_id;
-				// SAVE INCIDENT
 
-				// SAVE LOCATION (***IF IT DOES NOT EXIST***)
+				// STEP 1: SAVE LOCATION
 				$location = new Location_Model($location_id);
-				$location->location_name = $post->location_name;
-				$location->latitude = $post->latitude;
-				$location->longitude = $post->longitude;
-				$location->location_date = date("Y-m-d H:i:s", time());
-				$location->save();
+				reports::save_location($post, $location);
 
+				// STEP 2: SAVE INCIDENT
+				$incident_id = $post->incident_id;
 				$incident = new Incident_Model($incident_id);
-				$incident->location_id = $location->id;
-				$incident->user_id = 0;
-				$incident->incident_title = $post->incident_title;
-				$incident->incident_description = $post->incident_description;
+				reports::save_report($post, $incident, $location->id);
 
-				$incident_date = explode("/", $post->incident_date);
-				/**
-				 * where the $_POST['date'] is a value posted by form in
-				 * mm/dd/yyyy format
-				 */
-				$incident_date = $incident_date[2] . "-" . $incident_date[0] . "-" . $incident_date[1];
-
-				$incident_time = $post->incident_hour . ":" . $post->incident_minute . ":00 " . $post->incident_ampm;
-				$incident->incident_date = date("Y-m-d H:i:s", strtotime($incident_date . " " . $incident_time));
-				$incident->incident_datemodify = date("Y-m-d H:i:s", time());
-				// Incident Evaluation Info
-				$incident->incident_active = $post->incident_active;
-				$incident->incident_verified = $post->incident_verified;
-
-				$incident->save();
-
-				// Record Approval/Verification Action
+				// STEP 2b: Record Approval/Verification Action
 				$verify = new Verify_Model();
-				$verify->incident_id = $incident->id;
-				$verify->user_id = $_SESSION['auth_user']->id;
-				// Record 'Verified By' Action
-				$verify->verified_date = date("Y-m-d H:i:s", time());
+				reports::verify_approve($post, $verify, $incident);
 
-				if ($post->incident_active == 1)
-				{
-					$verify->verified_status = '1';
-				}
-				elseif ($post->incident_verified == 1)
-				{
-					$verify->verified_status = '2';
-				}
-				elseif ($post->incident_active == 1 && $post->incident_verified == 1)
-				{
-					$verify->verified_status = '3';
-				}
-				else
-				{
-					$verify->verified_status = '0';
-				}
-				$verify->save();
+				// STEP 2c: SAVE INCIDENT GEOMETRIES
+				reports::save_report_geometry($post, $incident);
 
-				// SAVE CATEGORIES
-				//check if data is csv or a single value.
-				$pos = strpos($post->incident_category, ",");
-				if ($pos === false)
-				{
-					//for backward compactibility. will drop support for it in the future.
-					if (@unserialize($post->incident_category))
-					{
-						$categories = unserialize($post->incident_category);
-					}
-					else
-					{
-						$categories = array($post->incident_category);
-					}
-				}
-				else
-				{
-					$categories = explode(",", $post->incident_category);
-				}
-
-				if (!empty($categories) AND is_array($categories))
-				{
-					// STEP 3: SAVE CATEGORIES
-					ORM::factory('Incident_Category')->where('incident_id', $incident->id)->delete_all();
-					// Delete Previous Entries
-					foreach ($categories as $item)
-					{
-						$incident_category = new Incident_Category_Model();
-						$incident_category->incident_id = $incident->id;
-						$incident_category->category_id = $item;
-						$incident_category->save();
-					}
-				}
+				// STEP 3: SAVE CATEGORIES
+				reports::save_category($post, $incident);
 
 				// STEP 4: SAVE MEDIA
-				// a. News
-				if (!empty($post->incident_news) && is_array($post->incident_news))
-				{
-					ORM::factory('Media')->where('incident_id', $incident->id)->where('media_type <> 1')->delete_all();
-					// Delete Previous Entries
+				reports::save_media($post, $incident);
 
-					foreach ($post->incident_news as $item)
-					{
-						if (!empty($item))
-						{
-							$news = new Media_Model();
-							$news->location_id = $location->id;
-							$news->incident_id = $incident->id;
-							$news->media_type = 4;
-							// News
-							$news->media_link = $item;
-							$news->media_date = date("Y-m-d H:i:s", time());
-							$news->save();
-						}
-					}
-				}
+				// STEP 5: SAVE PERSONAL INFORMATION
+				reports::save_personal_info($post, $incident);
 
-				// b. Video
-				if (!empty($post->incident_video) && is_array($post->incident_video))
-				{
+				// Action::report_edit - Edited a Report
+				Event::run('ushahidi_action.report_edit', $incident);
 
-					foreach ($post->incident_video as $item)
-					{
-						if (!empty($item))
-						{
-							$video = new Media_Model();
-							$video->location_id = $location->id;
-							$video->incident_id = $incident->id;
-							$video->media_type = 2;
-							// Video
-							$video->media_link = $item;
-							$video->media_date = date("Y-m-d H:i:s", time());
-							$video->save();
-						}
-					}
-				}
-
-				// c. Photos
-				if (!empty($post->incident_photo))
-				{
-					$filenames = upload::save('incident_photo');
-					$i = 1;
-					foreach ($filenames as $filename)
-					{
-						$new_filename = $incident->id . "_" . $i . "_" . time();
-
-						// Resize original file... make sure its max 408px wide
-						Image::factory($filename)->resize(408, 248, Image::AUTO)->save(Kohana::config('upload.directory', TRUE) . $new_filename . ".jpg");
-
-						// Create thumbnail
-						Image::factory($filename)->resize(70, 41, Image::HEIGHT)->save(Kohana::config('upload.directory', TRUE) . $new_filename . "_t.jpg");
-
-						// Remove the temporary file
-						unlink($filename);
-
-						// Save to DB
-						$photo = new Media_Model();
-						$photo->location_id = $location->id;
-						$photo->incident_id = $incident->id;
-						$photo->media_type = 1;
-						// Images
-						$photo->media_link = $new_filename . ".jpg";
-						$photo->media_thumb = $new_filename . "_t.jpg";
-						$photo->media_date = date("Y-m-d H:i:s", time());
-						$photo->save();
-						$i++;
-					}
-				}
-
-				// SAVE PERSONAL INFORMATION IF ITS FILLED UP
-				if (!empty($post->person_first) OR !empty($post->person_last))
-				{
-					ORM::factory('Incident_Person')->where('incident_id', $incident->id)->delete_all();
-					$person = new Incident_Person_Model();
-					$person->incident_id = $incident->id;
-					$person->person_first = $post->person_first;
-					$person->person_last = $post->person_last;
-					$person->person_email = $post->person_email;
-					$person->person_date = date("Y-m-d H:i:s", time());
-					$person->save();
-				}
-
+				// Success
 				return $this->response(0);
-				//success
-
 			}
 			else
 			{
@@ -739,7 +539,7 @@ class Admin_Reports_Api_Object extends Incidents_Api_Object {
 
 				foreach ($errors as $error_item => $error_description)
 				{
-					if (!is_array($error_description))
+					if ( ! is_array($error_description))
 					{
 						$this->error_messages .= $error_description;
 						if ($error_description != end($errors))
@@ -758,37 +558,6 @@ class Admin_Reports_Api_Object extends Incidents_Api_Object {
 			// Not sent by post method.
 			return $this->response(3);
 
-		}
-	}
-
-	/**
-	 * Delete Photo
-	 * @param int $id The unique id of the photo to be deleted
-	 */
-	private function delete_photo($id)
-	{
-		$auto_render = FALSE;
-		$template = "";
-
-		if ($id)
-		{
-			$photo = ORM::factory('media', $id);
-			$photo_large = $photo->media_link;
-			$photo_thumb = $photo->media_thumb;
-
-			// Delete Files from Directory
-			if (!empty($photo_large))
-			{
-				unlink(Kohana::config('upload.directory', TRUE) . $photo_large);
-			}
-
-			if (!empty($photo_thumb))
-			{
-				unlink(Kohana::config('upload.directory', TRUE) . $photo_thumb);
-			}
-
-			// Finally Remove from DB
-			$photo->delete();
 		}
 	}
 

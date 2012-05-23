@@ -41,6 +41,8 @@ class Validation_Core extends ArrayObject {
 	 */
 	protected $csrf_validation_failed = FALSE;
 
+	public static $is_api_request = FALSE;
+
 	/**
 	 * Creates a new Validation instance.
 	 *
@@ -400,13 +402,22 @@ class Validation_Core extends ArrayObject {
 			$validate_csrf = FALSE;
 		}
 
-		// HTTP post no CSRF validation
-		if ($_POST AND $validate_csrf)
+		// Disable CSRF for XHR
+		// Same method as django CSRF protection: 
+		//     http://michael-coates.blogspot.co.nz/2010/12/djangos-built-in-csrf-defense-for-ajax.html
+		if (request::is_ajax())
+		{
+			$validate_csrf = FALSE;
+		}
+
+		// Perform CSRF validation for all HTTP POST requests
+		// where CSRF validation is enabled and the request
+		// was not submitted via the API
+		if ($_POST AND $validate_csrf AND ! Validation::$is_api_request)
 		{
 			// Check if CSRF module is loaded
 			if (in_array(MODPATH.'csrf', Kohana::config('config.modules')))
 			{
-
 				// Check for presence of CSRF token in HTTP POST payload
 				$form_auth_token = (isset($_POST[$csrf_token_key]))
 				    ? $_POST[$csrf_token_key]
@@ -417,6 +428,7 @@ class Validation_Core extends ArrayObject {
 				// Validate the token
 				if ( ! csrf::valid($form_auth_token))
 				{
+					Kohana::log('debug', 'Invalid CSRF token: '.$form_auth_token);
 					// Flag CSRF validation as having failed
 					$this->csrf_validation_failed = TRUE;
 
@@ -744,7 +756,6 @@ class Validation_Core extends ArrayObject {
 			{
 				$errors['form_auth_token'] = $this->errors['form_auth_token'];
 			}
-
 			return $errors;
 		}
 	}

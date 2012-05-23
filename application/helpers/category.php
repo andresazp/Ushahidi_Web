@@ -57,7 +57,7 @@ class category_Core {
 	/**
 	 * Display category tree with input checkboxes.
 	 */
-	public static function tree($categories, array $selected_categories, $form_field, $columns = 1, $enable_parents = FALSE)
+	public static function tree($categories,$hide_children = TRUE, array $selected_categories, $form_field, $columns = 1, $enable_parents = FALSE)
 	{
 		$html = '';
 
@@ -84,17 +84,25 @@ class category_Core {
 			}
 
 			// Display parent category.
-			$html .= '<li>';
+			$html .= '<li title="'.$category->category_description.'">';
 			$html .= category::display_category_checkbox($category, $selected_categories, $form_field, $enable_parents);
 			
 			// Visible Child Count
 			$vis_child_count = 0;
 			foreach ($category->children as $child)
 			{
-				$child_visible = $child->category_visible;
-				if ($child_visible)
+				// If we don't want to show a category's hidden children
+				if($hide_children == TRUE)
 				{
-					// Increment Visible Child count
+					$child_visible = $child->category_visible;
+					if ($child_visible)
+					{
+						// Increment Visible Child count
+						++$vis_child_count;
+					}
+				}
+				else
+				{
 					++$vis_child_count;
 				}
 			}
@@ -104,10 +112,18 @@ class category_Core {
 				$html .= '<ul>';
 				foreach ($category->children as $child)
 				{
-					$child_visible = $child->category_visible;
-					if ($child_visible)
+					if($hide_children)
 					{
-						$html .= '<li>';
+						$child_visible = $child->category_visible;
+						if ($child_visible)
+						{
+							$html .= '<li>';
+							$html .= category::display_category_checkbox($child, $selected_categories, $form_field, $enable_parents);
+						}
+					}
+					else
+					{
+						$html .= '<li title="'.$child->category_description.'">';
 						$html .= category::display_category_checkbox($child, $selected_categories, $form_field, $enable_parents);
 					}
 				}

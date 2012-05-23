@@ -124,7 +124,25 @@ class map_Core {
 		// Hack on XYZ / Esri Attribution layer here since XYZ doesn't support images in attribution
 		if (stripos($default_map,'esri_') !== FALSE AND $all == FALSE)
 		{
-			$js .= "$('div#map').append('<div style=\"position:absolute;right:0;z-index:1000;margin: -40px 10px 0 90px;\"><img src=\"http://www.arcgis.com/home/images/map/logo-sm.png\" style=\"float:right;\"/><small>Sources: Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, IGN, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community</small></div>');";
+			// We have two div ids that we use for maps, map and divMap. We need a more permanent
+			//   solution to cover any div name.
+			$js .= "if ( $(\"#map\").length > 0 ) { divName = \"map\" }else{ divName= \"divMap\" }"
+				. "var esriAttributionDiv = document.createElement('div');"
+			    . "$(esriAttributionDiv).html('"
+				. "<img src=\"http://www.arcgis.com/home/images/map/logo-sm.png\" style=\"float:right;\"/>"
+				. "<small style=\"position: absolute; bottom: -10px;\">"
+				. "Sources: Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, "
+				. "GeoBase, IGN, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), "
+				. "and the GIS User Community"
+				. "</small>');\n"
+			    . "$(esriAttributionDiv).css({\n"
+			    . "\t'position': 'absolute',\n"
+			    . "\t'z-index': 10000,\n"
+			    . "\t'margin': '-40px 0 0 85px',\n"
+			    . "\t'right': $('div#'+divName).offset().right + 10,\n"
+			    . "\t'width': $('div#'+divName).width() - 90,\n"
+			    . "});\n"
+				. "$(esriAttributionDiv).appendTo($('div#'+divName));";
 		}
 		
 		Event::run('ushahidi_filter.map_layers_js', $js);
@@ -447,15 +465,48 @@ class map_Core {
 		if ($address)
 		{
 			$map_object = new GoogleMapAPI;
-			//$map_object->_minify_js = isset($_REQUEST["min"]) ? FALSE : TRUE;
-			$geocodes = $map_object->getGeoCode($address);
-			//$geocodes = $MAP_OBJECT->geoGetCoordsFull($address);
+
+			// Get the full address data
+			$payload = $map_object->geoGetCoordsFull($address);
+
+			// Verify that the request succeeded
+			if ($payload->status != 'OK')
+				return FALSE;
+
+			// Convert the Geocoder's results to an array
+			$all_components = json_decode(json_encode($payload->results), TRUE);
+			$location = $all_components[0]['geometry']['location'];
+
+			// Find the country
+			$address_components = $all_components[0]['address_components'];
+			$country_name = NULL;
+			foreach ($address_components as $component)
+			{
+				if (in_array('country', $component['types']))
+				{
+					$country_name  = $component['long_name'];
+					break;
+				}
+			}
+
+			// If no country has been found, use the formatted address
+			if (empty($country_name))
+			{
+				$country_name = $all_components[0]['formatted_address'];
+			}
+
+			$geocodes = array(
+				'country' => $country_name,
+				'location_name' => $all_components[0]['formatted_address'],
+				'latitude' => $location['lat'],
+				'longitude' => $location['lng']
+			);
 
 			return $geocodes;
 		}
 		else
 		{
-			return false;
+			return FALSE;
 		}
 	}
 
