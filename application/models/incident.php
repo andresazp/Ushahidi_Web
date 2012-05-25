@@ -29,7 +29,8 @@ class Incident_Model extends ORM {
 		'incident_lang',
 		'form_response',
 		'cluster' => 'cluster_incident',
-		'geometry'
+		'geometry',
+		'revision_incidents'
 	);
 
 	/**

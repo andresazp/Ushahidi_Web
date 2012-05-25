@@ -27,3 +27,6 @@
 [submodule "restapi"]
 	path = plugins/restapi
 	url = git://github.com/rjmackay/Ushahidi-plugin-restapiv2.git
+[submodule "revision"]
+	path = plugins/revision
+	url = git@github.com:rjmackay/Ushahidi-plugin-revision.git
