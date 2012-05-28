@@ -32,6 +32,15 @@ class nav_Core {
 			$menu .= ($this_page == 'home') ? " class=\"active\"" : "";
 		 	$menu .= ">".Kohana::lang('ui_main.home')."</a></li>";
 		 }
+		
+		// Custom Pages
+		$pages = ORM::factory('page')->where('page_active', '1')->find_all();
+		foreach ($pages as $page)
+		{
+			$menu .= "<li><a href=\"".url::site()."page/index/".$page->id."\" ";
+			$menu .= ($this_page == 'page_'.$page->id) ? " class=\"active\"" : "";
+		 	$menu .= ">".$page->page_tab."</a></li>";
+		}
 
 		// Reports List
 		if( ! in_array('reports',$dontshow))
@@ -40,17 +49,6 @@ class nav_Core {
 			$menu .= ($this_page == 'reports') ? " class=\"active\"" : "";
 		 	$menu .= ">".Kohana::lang('ui_main.reports')."</a></li>";
 		 }
-		
-		// Reports Submit
-		if( ! in_array('reports_submit',$dontshow))
-		{
-			if (Kohana::config('settings.allow_reports'))
-			{
-				$menu .= "<li><a href=\"".url::site()."reports/submit\" ";
-				$menu .= ($this_page == 'reports_submit') ? " class=\"active\"":"";
-			 	$menu .= ">".Kohana::lang('ui_main.submit')."</a></li>";
-			}
-		}
 		
 		// Alerts
 		if(! in_array('alerts',$dontshow))
@@ -63,6 +61,17 @@ class nav_Core {
 			}
 		}
 		
+		// Reports Submit
+		if( ! in_array('reports_submit',$dontshow))
+		{
+			if (Kohana::config('settings.allow_reports'))
+			{
+				$menu .= "<li><a href=\"".url::site()."reports/submit\" ";
+				$menu .= ($this_page == 'reports_submit') ? " class=\"active\"":"";
+			 	$menu .= ">".Kohana::lang('ui_main.submit')."</a></li>";
+			}
+		}
+		
 		// Contacts
 		if( ! in_array('contact',$dontshow))
 		{
@@ -72,15 +81,6 @@ class nav_Core {
 				$menu .= ($this_page == 'contact') ? " class=\"active\"" : "";
 			 	$menu .= ">".Kohana::lang('ui_main.contact')."</a></li>";	
 			}
-		}
-		
-		// Custom Pages
-		$pages = ORM::factory('page')->where('page_active', '1')->find_all();
-		foreach ($pages as $page)
-		{
-			$menu .= "<li><a href=\"".url::site()."page/index/".$page->id."\" ";
-			$menu .= ($this_page == 'page_'.$page->id) ? " class=\"active\"" : "";
-		 	$menu .= ">".$page->page_tab."</a></li>";
 		}
 
 		echo $menu;

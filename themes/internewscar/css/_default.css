@@ -128,6 +128,11 @@ div.submit-incident a, .btn_submit {
   -webkit-border-radius: 3px;
 }
 
+body.page-bigmap div.submit-incident {
+	top: 5px;
+	right: 10px;
+}
+
 /* primary nav */
 div#mainmenu { background:none; border:none; height:27px; }
 div#mainmenu ul {
