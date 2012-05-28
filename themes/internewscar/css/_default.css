@@ -119,6 +119,9 @@ div#logo span {
   color: #999;
   font-family: 'Georgia', serif;
 }
+body.page-bigmap div#logo {
+	padding: 7px 10px;
+}
 
 /* submit report button */
 div.submit-incident { margin:0; top:20%; }
