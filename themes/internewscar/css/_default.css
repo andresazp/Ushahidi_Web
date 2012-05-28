@@ -214,8 +214,8 @@ div#right { position:absolute; z-index:1000; }
   #how-to-report-menu-toggle { position:absolute; top:20px; left:780px; width:100px; display: none;}
   
   #kml_switch,
-  #sharing_switch {  position:absolute; top:49px; padding:5px; left:220px; background:#f9f7f8; width:175px;}
-  #sharing_switch { left:322px; }
+  #sharing_switch { }
+  #sharing_switch { }
   #how-to-report-box { float: right;
 		float: right;
 		width: 172px;
