@@ -116,7 +116,7 @@ div#logo h1 a {
 }
 div#logo span {
   font-style: italic;
-  color: #999;
+  color: #000;
   font-family: 'Georgia', serif;
 }
 body.page-bigmap div#logo {
@@ -138,6 +138,7 @@ body.page-bigmap div.submit-incident {
 
 /* primary nav */
 div#mainmenu { background:none; border:none; height:27px; }
+body.page-bigmap div#mainmenu {background: #585858; border: none; height: auto;}
 div#mainmenu ul {
   
 }
