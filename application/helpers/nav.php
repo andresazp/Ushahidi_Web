@@ -34,7 +34,7 @@ class nav_Core {
 		 }
 		
 		// Custom Pages
-		$pages = ORM::factory('page')->where('page_active', '1')->find_all();
+		$pages = ORM::factory('page')->where('page_active', '1')->orderby('page_tab','ASC')->find_all();
 		foreach ($pages as $page)
 		{
 			$menu .= "<li><a href=\"".url::site()."page/index/".$page->id."\" ";
