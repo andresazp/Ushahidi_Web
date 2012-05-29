@@ -393,6 +393,7 @@
 	'reporter_levels' => 'Reporter Levels',
 	'reporter_phone' => 'Reporter Phone',
 	'reports' => 'Reports',
+	'reports_tab' => 'Reports',
 	'reports_btn_browse' => 'Browse',
 	'reports_btn_submit' => 'Submit',
 	'reports_by_this_user' => 'Reports By This User',

@@ -47,7 +47,7 @@ class nav_Core {
 		{
 			$menu .= "<li><a href=\"".url::site()."reports\" ";
 			$menu .= ($this_page == 'reports') ? " class=\"active\"" : "";
-		 	$menu .= ">".Kohana::lang('ui_main.reports')."</a></li>";
+		 	$menu .= ">".Kohana::lang('ui_main.reports_tab')."</a></li>";
 		 }
 		
 		// Alerts
