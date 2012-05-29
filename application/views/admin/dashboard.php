@@ -25,7 +25,7 @@
 					
 					<!-- box -->
 					<div class="box">
-						<h3><?php echo Kohana::lang('ui_main.reports');?> <?php echo Kohana::lang('ui_main.reports_timeline');?></h3>
+						<h3><?php echo Kohana::lang('ui_main.reports_timeline');?></h3>
 						<ul class="inf" style="margin-bottom:10px;">
 							<li class="none-separator"><?php echo Kohana::lang('ui_main.view');?>:<a href="<?php print url::site() ?>admin/dashboard/?range=1"><?php echo Kohana::lang('ui_main.today');?></a></li>
 							<li><a href="<?php print url::site() ?>admin/dashboard/?range=31"><?php echo Kohana::lang('ui_main.past_month');?></a></li>
@@ -110,9 +110,9 @@
 							?>
 							<div class="post">
 								<ul class="post-info">
-									<li><a href="#" class="<?php echo $incident_approved; ?>"><?php echo strtoupper(Kohana::lang('ui_main.approved'));?>:</a></li>
-									<li><a href="#" class="<?php echo $incident_verified ?>"><?php echo strtoupper(Kohana::lang('ui_main.verified'));?>:</a></li>
-									<li class="last"><a href="#" class="<?php echo $submit_mode; ?>"><?php echo strtoupper(Kohana::lang('ui_main.source'));?>:</a></li>
+									<li><a href="#" class="<?php echo $incident_approved; ?>"><?php echo Kohana::lang('ui_main.approved');?>:</a></li>
+									<li><a href="#" class="<?php echo $incident_verified ?>"><?php echo Kohana::lang('ui_main.verified');?>:</a></li>
+									<li class="last"><a href="#" class="<?php echo $submit_mode; ?>"><?php echo Kohana::lang('ui_main.source');?>:</a></li>
 								</ul>
 								<h4><strong><?php echo $incident_date; ?></strong><a href="<?php echo url::site() . 'admin/reports/edit/' . $incident_id; ?>"><?php echo $incident_title; ?></a></h4>
 								<p><?php echo $incident_description; ?></p>
