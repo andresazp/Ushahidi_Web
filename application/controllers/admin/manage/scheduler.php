@@ -105,7 +105,7 @@ class Scheduler_Controller extends Admin_Controller
 						
 						$scheduler->save();
 						$form_saved = TRUE;
-						$form_action = strtoupper(Kohana::lang('ui_admin.modified'));
+						$form_action = utf8::strtoupper(Kohana::lang('ui_admin.modified'));
 					}
 				}
 				else
@@ -116,7 +116,7 @@ class Scheduler_Controller extends Admin_Controller
 					$scheduler->scheduler_minute = $post->scheduler_minute;
 					$scheduler->save();
 					$form_saved = TRUE;
-					$form_action = strtoupper(Kohana::lang('ui_admin.edited'));
+					$form_action = utf8::strtoupper(Kohana::lang('ui_admin.edited'));
 				}
 
 			} else {
