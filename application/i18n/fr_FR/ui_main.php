@@ -94,6 +94,7 @@
 	'new_report' => 'Nouveau rapport',
 	'no' => 'Non',
 	'no_results' => 'Aucun résultat',
+	'not_approved' => 'Non approuvé',
 	'official_news' => 'Nouvelles officielles et actualité',
 	'outbox' => 'Boîte d\'envoi',
 	'past_month' => 'Mois précédent',
