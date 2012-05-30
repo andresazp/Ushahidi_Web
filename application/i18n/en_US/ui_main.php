@@ -81,6 +81,7 @@
 	'clear_map' => 'Clear Map',
 	'close' => 'Close',
 	'clusters' => 'clusters',
+	'cluster_name_reports' => 'Reports',
 	'color' => 'Color',
 	'comment' => 'Comment',
 	'comments' => 'Comments',
