@@ -1,0 +1,10 @@
+[submodule "timespan"]
+	path = plugins/timespan
+	url = git://github.com/jetherton/timespan.git
+[submodule "tedx-theme"]
+	path = plugins/tedx
+	url = git://github.com/rjmackay/Ushahidi-ted-plugin.git
+[submodule "tedx-plugin"]
+	path = themes/tedx
+	url = git://github.com/rjmackay/Ushahidi-ted-theme.git
+
