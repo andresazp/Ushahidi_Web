@@ -187,17 +187,17 @@
 
 	<div class="right-col">
 
-		<div class="report-print"><a href="#" onclick="window.print(); return false;" class="print">Print this report</a></div>
+		<div class="report-print"><a href="#" onclick="window.print(); return false;" class="print"><?php echo Kohana::lang('printreport.print_report'); ?></a></div>
 
 		<div class="report-media-box-content">
 
 			<div id="report-map" class="report-map">
 				<div class="map-holder" id="map"></div>
         <ul class="map-toggles">
-          <li><a href="#" class="smaller-map">Smaller map</a></li>
-          <li style="display:block;"><a href="#" class="wider-map">Wider map</a></li>
-          <li><a href="#" class="taller-map">Taller map</a></li>
-          <li><a href="#" class="shorter-map">Shorter Map</a></li>
+          <li><a href="#" class="smaller-map"><?php echo Kohana::lang('ui_main.smaller_map'); ?></a></li>
+          <li style="display:block;"><a href="#" class="wider-map"><?php echo Kohana::lang('ui_main.wider_map'); ?></a></li>
+          <li><a href="#" class="taller-map"><?php echo Kohana::lang('ui_main.taller_map'); ?></a></li>
+          <li><a href="#" class="shorter-map"><?php echo Kohana::lang('ui_main.shorter_map'); ?></a></li>
         </ul>
         <div style="clear:both"></div>
 			</div>

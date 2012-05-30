@@ -206,7 +206,7 @@
 						</p>
 					</div>          
 				<div><h2><a href="<?php echo url::site('reports/download'); ?>"><?php echo Kohana::lang('ui_main.download_reports'); ?></a></h2></div>
-				<div><h2><a href="<?php echo url::site('printmap'); ?>">Print a map</a></h2></div>
+				<div><h2><a href="<?php echo url::site('printmap'); ?>"><?php echo Kohana::lang('adminmap.print_a_map'); ?></a></h2></div>
 				</div>
 				<!-- end #filters-box -->
 			</div>
