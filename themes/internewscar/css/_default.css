@@ -300,6 +300,10 @@ div.report-additional-reports h5 { font-family: Arial, sans-serif;  }
 .step-1 h2 {
   padding: 0;
 }
+.step-1 .map {
+	height: auto;
+}
+
 /* footer */
 div#footer {
   background: #000;
