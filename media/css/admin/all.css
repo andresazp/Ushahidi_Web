@@ -682,15 +682,15 @@ table td{
 	padding:12px 0 10px 10px;
 	width:25px;
 }
-.table .col-2{ width:539px;}
-.table .col-2 p{ width:539px;word-wrap: break-word;}
+.table .col-2{ width:529px;}
+.table .col-2 p{ width:529px;word-wrap: break-word;}
 .table .col-2_sub{
-	width:519px;
+	width:509px;
 	padding-left:30px;
 	background:url(../../img/admin/arrow.gif) no-repeat 13px 22px;
 }
 .table .col-3{
-	width:103px;
+	width:93px;
 }
 .table td.col-3 {
 	font-size:12px;
@@ -700,7 +700,7 @@ table td{
 .table .col-4{
 	border-right:2px solid #bbb;
 	padding:12px 18px 10px 0;
-	width:200px;
+	width:220px;
 }
 .table .col{
 	border-left:2px solid #bbb;
