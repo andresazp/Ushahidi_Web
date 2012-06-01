@@ -11,5 +11,12 @@
 	'settings_site_email' => 'Adresse email à laquelle les rapports et les messages seront envoyés.',
 	'settings_site_name' => 'Nom de votre site (visite en haut de la page principale).',
 	'settings_site_tagline' => 'Décrivez votre site en quelques mots.',
+	'reports' => array(
+		'reports_title' => 'Exemple: Besoin d’eau potable à Sam-Ouandjia',
+		'reports_date' => 'Date et lieu de l’événement, format: MM/DD/YYYY',
+		'date_time' => 'Date et lieu de l’événement',
+		'reports_optional' => 'Renseignements personnels - rapporteur. Les détails ne seront pas rendus publics.',
+		'reports_photos' => 'Inclure une photo en pièce jointe',
+	),
 	);
 ?>

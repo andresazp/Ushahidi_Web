@@ -196,7 +196,7 @@
 
 				<!-- News Fields -->
 				<div id="divNews" class="report_row">
-					<h4><?php echo Kohana::lang('ui_main.reports_news'); ?><br /><span class="example"><?php echo Kohana::lang('tooltips.reports.reports_news'); ?></span></h4>
+					<h4><?php echo Kohana::lang('ui_main.reports_news'); ?><br /><span class="example"><?php //echo Kohana::lang('tooltips.reports.reports_news'); ?></span></h4>
 					<?php
 						$this_div = "divNews";
 						$this_field = "incident_news";
@@ -233,7 +233,7 @@
 
 				<!-- Video Fields -->
 				<div id="divVideo" class="report_row">
-					<h4><?php echo Kohana::lang('ui_main.external_video_link'); ?><br /><span class="example"><?php echo Kohana::lang('tooltips.reports.external_video_link'); ?></span></h4>
+					<h4><?php echo Kohana::lang('ui_main.external_video_link'); ?><br /><span class="example"><?php //echo Kohana::lang('tooltips.reports.external_video_link'); ?></span></h4>
 					<?php
 						$this_div = "divVideo";
 						$this_field = "incident_video";
