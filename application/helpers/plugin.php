@@ -32,12 +32,16 @@ class plugin_Core {
 	 */
 	public static function add_javascript($javascripts = array())
 	{
-		if ( ! is_array($javascripts))
-			$javascripts = array($javascripts);
-
-		foreach ($javascripts as $key => $javascript)
+		if (is_array($javascripts))
 		{
-			self::$javascripts[] = $javascript;
+			foreach($javascripts as $javascript)
+			{
+				Requirements::javascript('plugins/'.$javascript);
+			}
+		}
+		else
+		{
+			Requirements::javascript('plugins/'.$javascripts);
 		}
 	}
 	
@@ -49,10 +53,9 @@ class plugin_Core {
 	 */
 	public static function remove_javascript($javascripts = array())
 	{
-		foreach (self::$javascripts as $key => $javascript)
+		foreach ($javascripts as $javascript)
 		{
-			if (in_array($javascript, $javascripts))
-				unset(self::$javascripts[$key]);
+			Requirements::block('plugins/'.$javascripts);
 		}
 	}
 	
@@ -64,12 +67,16 @@ class plugin_Core {
 	 */
 	public static function add_stylesheet($stylesheets = array())
 	{
-		if ( ! is_array($stylesheets))
-			$stylesheets = array($stylesheets);
-
-		foreach ($stylesheets as $key => $stylesheet)
+		if (is_array($stylesheets))
 		{
-			self::$stylesheets[] = $stylesheet;
+			foreach($stylesheets as $stylesheet)
+			{
+				Requirements::css('plugins/'.$stylesheet);
+			}
+		}
+		else
+		{
+			Requirements::css('plugins/'.$stylesheets);
 		}
 	}
 	

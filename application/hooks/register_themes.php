@@ -32,7 +32,7 @@ class register_themes {
 	public function register()
 	{
 		// Array to hold all the CSS files
-		$theme_css = array();
+		//$theme_css = array();
 		// Array to hold all the Javascript files
 		$theme_js = array();
 
@@ -40,9 +40,10 @@ class register_themes {
 		Kohana::config_set('core.modules', array_merge(array(THEMEPATH."default"),
 			Kohana::config("core.modules")));
 
-		$css_url = (Kohana::config("cdn.cdn_css")) ?
+		/*$css_url = (Kohana::config("cdn.cdn_css")) ?
 			Kohana::config("cdn.cdn_css") : url::base();
-		$theme_css[] = $css_url."themes/default/css/style.css";
+		$theme_css[] = $css_url."themes/default/css/style.css";*/
+		Requirements::css("themes/default/css/style");
 
 		// 2. Extend the default theme
 		$theme = THEMEPATH.Kohana::config("settings.site_style");
@@ -57,7 +58,8 @@ class register_themes {
 				while (($css_file = $css->read()) !== FALSE)
 					if (preg_match('/\.css/i', $css_file))
 					{
-						$theme_css[] = url::base()."themes/".Kohana::config("settings.site_style")."/css/".$css_file;
+						Requirements::css("themes/".Kohana::config("settings.site_style")."/css/".$css_file);
+						//$theme_css[] = url::base()."themes/".Kohana::config("settings.site_style")."/css/".$css_file;
 					}
 			}
 
@@ -84,7 +86,7 @@ class register_themes {
 				}
 		}
 
-		Kohana::config_set('settings.site_style_css',$theme_css);
+		//Kohana::config_set('settings.site_style_css',$theme_css);
 		Kohana::config_set('settings.site_style_js',$theme_js);
 	}
 }
