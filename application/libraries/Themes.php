@@ -39,10 +39,6 @@ class Themes_Core {
 
 		// Load Session
 		$this->session = Session::instance();
-
-		// Grab the proper URL for the css and js files
-		$this->css_url = url::file_loc('css');
-		$this->js_url = url::file_loc('js');
 	}
 
 	/**

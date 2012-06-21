@@ -638,7 +638,7 @@ class Requirements_Backend {
 			$this->process_combined_files(); 
 	
 			foreach(array_diff_key($this->js,$this->blocked) as $file => $dummy) {
-				$path = $this->path_for_file($file, '.js');
+				$path = $this->path_for_file($file, 'js');
 				if($path) {
 					//$jsRequirements .= html::script($path, TRUE);
 					$jsRequirements .= "<script type=\"text/javascript\" src=\"$path\"></script>\n";
@@ -656,7 +656,7 @@ class Requirements_Backend {
 			}
 			
 			foreach(array_diff_key($this->css,$this->blocked) as $file => $params) {
-				$path = $this->path_for_file($file, '.css');
+				$path = $this->path_for_file($file, 'css');
 				if($path) {
 					//$media = (isset($params['media']) && !empty($params['media'])) ? $params['media'] : "";
 					//$requirements .= html::stylesheet($path, $media, TRUE);
@@ -692,9 +692,12 @@ class Requirements_Backend {
 	 * Finds the path for specified file.
 	 *
 	 * @param string $fileOrUrl
+	 * @param string $type file type ie. css or js
 	 * @return string|boolean 
 	 */
-	protected function path_for_file($fileOrUrl, $suffix) {
+	protected function path_for_file($fileOrUrl, $type) {
+		// Add extension if not present
+		$suffix = ".$type";
 		$length = strlen($suffix);
 		if ( $length > 0 AND substr_compare($fileOrUrl, $suffix, -$length, $length, FALSE) !== 0)
 		{
@@ -705,7 +708,9 @@ class Requirements_Backend {
 		if(preg_match('/^http[s]?/', $fileOrUrl)) {
 			return $fileOrUrl;
 		} elseif (file_exists(DOCROOT . $fileOrUrl)) {
-			$prefix = url::base();
+			// Get url prefix, either site base url or CDN url
+			$prefix = url::file_loc($type);
+			
 			$mtimesuffix = "";
 			$suffix = '';
 			if(strpos($fileOrUrl, '?') !== false) {
