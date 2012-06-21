@@ -34,7 +34,7 @@ class register_themes {
 		// Array to hold all the CSS files
 		//$theme_css = array();
 		// Array to hold all the Javascript files
-		$theme_js = array();
+		//$theme_js = array();
 
 		// 1. Load the default theme
 		Kohana::config_set('core.modules', array_merge(array(THEMEPATH."default"),
@@ -69,7 +69,8 @@ class register_themes {
 				while (($js_file = $js->read()) !== FALSE)
 					if (preg_match('/\.js/i', $js_file))
 					{
-						$theme_js[] = url::base()."themes/".Kohana::config("settings.site_style")."/js/".$js_file;
+						Requirements::js("themes/".Kohana::config("settings.site_style")."/js/".$js_file);
+						//$theme_js[] = url::base()."themes/".Kohana::config("settings.site_style")."/js/".$js_file;
 					}
 			}
 		}
@@ -87,7 +88,7 @@ class register_themes {
 		}
 
 		//Kohana::config_set('settings.site_style_css',$theme_css);
-		Kohana::config_set('settings.site_style_js',$theme_js);
+		//Kohana::config_set('settings.site_style_js',$theme_js);
 	}
 }
 
