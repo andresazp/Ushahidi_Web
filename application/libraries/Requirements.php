@@ -103,19 +103,19 @@ class Requirements {
 	 * See {@link Requirements_Backend::javascript()} for more info
 	 * 
 	 */
-	static function javascript($file) {		
-		self::backend()->javascript($file);
+	static function js($file) {		
+		self::backend()->js($file);
 	}
 	
 	/**
 	 * Add the javascript code to the header of the page
 	 * 
-	 * See {@link Requirements_Backend::customScript()} for more info
+	 * See {@link Requirements_Backend::customJS()} for more info
 	 * @param script The script content
 	 * @param uniquenessID Use this to ensure that pieces of code only get added once.
 	 */
-	static function customScript($script, $uniquenessID = null) {
-		self::backend()->customScript($script, $uniquenessID);
+	static function customJS($script, $uniquenessID = null) {
+		self::backend()->customJS($script, $uniquenessID);
 	}
 
 	/**
@@ -132,13 +132,13 @@ class Requirements {
 	
 	/**
 	 * Add the following custom code to the <head> section of the page.
-	 * See {@link Requirements_Backend::insertHeadTags()}
+	 * See {@link Requirements_Backend::customHeadTags()}
 	 * 
 	 * @param string $html
 	 * @param string $uniquenessID
 	 */
-	static function insertHeadTags($html, $uniquenessID = null) {
-		self::backend()->insertHeadTags($html, $uniquenessID);
+	static function customHeadTags($html, $uniquenessID = null) {
+		self::backend()->customHeadTags($html, $uniquenessID);
 	}
 	
 	/**
@@ -174,7 +174,7 @@ class Requirements {
 
 	/**
 	 * Clear either a single or all requirements.
-	 * Caution: Clearing single rules works only with customCSS and customScript if you specified a {@uniquenessID}. 
+	 * Caution: Clearing single rules works only with customCSS and customJS if you specified a {@uniquenessID}. 
 	 * 
 	 * See {@link Requirements_Backend::clear()}
 	 * 
@@ -238,10 +238,10 @@ class Requirements {
 	 * @param Boolean
 	 * @param Boolean
 	 * 
-	 * See {@link Requirements_Backend::add_i18n_javascript()} for more information.
+	 * See {@link Requirements_Backend::add_i18n_js()} for more information.
 	 */
-	/*public static function add_i18n_javascript($langDir, $return = false, $langOnly = false) {
-		return self::backend()->add_i18n_javascript($langDir, $return, $langOnly);
+	/*public static function add_i18n_js($langDir, $return = false, $langOnly = false) {
+		return self::backend()->add_i18n_js($langDir, $return, $langOnly);
 	}*/
 	
 	/**
@@ -342,9 +342,9 @@ class Requirements_Backend {
 	/**
 	 * Paths to all required .js files relative to the webroot.
 	 *
-	 * @var array $javascript
+	 * @var array $js
 	 */
-	protected $javascript = array();
+	protected $js = array();
 
 	/**
 	 * Paths to all required .css files relative to the webroot.
@@ -357,9 +357,9 @@ class Requirements_Backend {
 	 * All custom javascript code that is inserted
 	 * directly at the bottom of the HTML <head> tag.
 	 *
-	 * @var array $customScript
+	 * @var array $customJS
 	 */
-	protected $customScript = array();
+	protected $customJS = array();
 
 	/**
 	 * All custom CSS rules which are inserted
@@ -487,8 +487,8 @@ class Requirements_Backend {
 	 * Filenames should be relative to the base, eg, 'framework/javascript/loader.js'
 	 */
 	
-	public function javascript($file) {
-		$this->javascript[$file] = true;
+	public function js($file) {
+		$this->js[$file] = true;
 	}
 	
 	/**
@@ -496,8 +496,8 @@ class Requirements_Backend {
 	 *
 	 * @return array
 	 */
-	public function get_javascript() {
-		return array_keys(array_diff_key($this->javascript,$this->blocked));
+	public function get_js() {
+		return array_keys(array_diff_key($this->js,$this->blocked));
 	}
 	
 	/**
@@ -506,9 +506,9 @@ class Requirements_Backend {
 	 * @param script The script content
 	 * @param uniquenessID Use this to ensure that pieces of code only get added once.
 	 */
-	public function customScript($script, $uniquenessID = null) {
-		if($uniquenessID) $this->customScript[$uniquenessID] = $script;
-		else $this->customScript[] = $script;
+	public function customJS($script, $uniquenessID = null) {
+		if($uniquenessID) $this->customJS[$uniquenessID] = $script;
+		else $this->customJS[] = $script;
 		
 		$script .= "\n";
 	}
@@ -530,7 +530,7 @@ class Requirements_Backend {
 	 * @param string $html
 	 * @param string $uniquenessID
 	 */
-	function insertHeadTags($html, $uniquenessID = null) {
+	function customHeadTags($html, $uniquenessID = null) {
 		if($uniquenessID) $this->customHeadTags[$uniquenessID] = $html;
 		else $this->customHeadTags[] = $html;
 	}
@@ -558,7 +558,7 @@ class Requirements_Backend {
 	 * e.g. when using your own prototype.js.
 	 * Blocking should only be used as an exception, because
 	 * it is hard to trace back. You can just block items with an
-	 * ID, so make sure you add an unique identifier to customCSS() and customScript().
+	 * ID, so make sure you add an unique identifier to customCSS() and customJS().
 	 * 
 	 * @param string $fileOrID
 	 */
@@ -568,28 +568,28 @@ class Requirements_Backend {
 	
 	/**
 	 * Clear either a single or all requirements.
-	 * Caution: Clearing single rules works only with customCSS and customScript if you specified a {@uniquenessID}. 
+	 * Caution: Clearing single rules works only with customCSS and customJS if you specified a {@uniquenessID}. 
 	 * 
 	 * @param $file String
 	 */
 	function clear($fileOrID = null) {
 		if($fileOrID) {
-			foreach(array('javascript','css', 'customScript', 'customCSS', 'customHeadTags') as $type) {
+			foreach(array('js','css', 'customJS', 'customCSS', 'customHeadTags') as $type) {
 				if(isset($this->{$type}[$fileOrID])) {
 					$this->disabled[$type][$fileOrID] = $this->{$type}[$fileOrID];
 					unset($this->{$type}[$fileOrID]);
 				}
 			}
 		} else {
-			$this->disabled['javascript'] = $this->javascript;
+			$this->disabled['js'] = $this->js;
 			$this->disabled['css'] = $this->css;
-			$this->disabled['customScript'] = $this->customScript;
+			$this->disabled['customJS'] = $this->customJS;
 			$this->disabled['customCSS'] = $this->customCSS;
 			$this->disabled['customHeadTags'] = $this->customHeadTags;
 		
-			$this->javascript = array();
+			$this->js = array();
 			$this->css = array();
-			$this->customScript = array();
+			$this->customJS = array();
 			$this->customCSS = array();
 			$this->customHeadTags = array();
 		}
@@ -614,9 +614,9 @@ class Requirements_Backend {
 	 * Restore requirements cleared by call to Requirements::clear
 	 */
 	function restore() {
-		$this->javascript = $this->disabled['javascript'];
+		$this->js = $this->disabled['js'];
 		$this->css = $this->disabled['css'];
-		$this->customScript = $this->disabled['customScript'];
+		$this->customJS = $this->disabled['customJS'];
 		$this->customCSS = $this->disabled['customCSS'];
 		$this->customHeadTags = $this->disabled['customHeadTags'];
 	}
@@ -630,14 +630,14 @@ class Requirements_Backend {
 	function render($renderFor = 'head') {
 		$content = '';
 
-		if($this->css || $this->javascript || $this->customCSS || $this->customScript || $this->customHeadTags) {
+		if($this->css || $this->js || $this->customCSS || $this->customJS || $this->customHeadTags) {
 			$requirements = '';
 			$jsRequirements = '';
 			
-			// Combine files - updates $this->javascript and $this->css 
+			// Combine files - updates $this->js and $this->css 
 			$this->process_combined_files(); 
 	
-			foreach(array_diff_key($this->javascript,$this->blocked) as $file => $dummy) {
+			foreach(array_diff_key($this->js,$this->blocked) as $file => $dummy) {
 				$path = $this->path_for_file($file, '.js');
 				if($path) {
 					//$jsRequirements .= html::script($path, TRUE);
@@ -647,8 +647,8 @@ class Requirements_Backend {
 			
 			// add all inline javascript *after* including external files which
 			// they might rely on
-			if($this->customScript) {
-				foreach(array_diff_key($this->customScript,$this->blocked) as $script) { 
+			if($this->customJS) {
+				foreach(array_diff_key($this->customJS,$this->blocked) as $script) { 
 					$jsRequirements .= "<script type=\"text/javascript\">\n//<![CDATA[\n";
 					$jsRequirements .= "$script\n";
 					$jsRequirements .= "\n//]]>\n</script>\n";
@@ -789,7 +789,7 @@ class Requirements_Backend {
 							$this->css($file['path']);
 							break;
 						default:
-							$this->javascript($file['path']);
+							$this->js($file['path']);
 							break;
 					}
 					$files[$index] = $file['path'];
@@ -799,7 +799,7 @@ class Requirements_Backend {
 							$this->css($file[0]);
 							break;
 						default:
-							$this->javascript($file[0]);
+							$this->js($file[0]);
 							break;
 					}
 					$files[$index] = $file[0];
@@ -809,7 +809,7 @@ class Requirements_Backend {
 			}
 			if (!is_array($file)) {
 				if(substr($file, -2) == 'js') {
-					$this->javascript($file);
+					$this->js($file);
 				} elseif(substr($file, -3) == 'css') {
 					$this->css($file);
 				} else {
@@ -876,7 +876,7 @@ class Requirements_Backend {
 		$combinedFiles = array();
 		$newJSRequirements = array();
 		$newCSSRequirements = array();
-		foreach($this->javascript as $file => $dummy) {
+		foreach($this->js as $file => $dummy) {
 			if(isset($combinerCheck[$file])) {
 				$newJSRequirements[$combinedFilesFolder . $combinerCheck[$file]] = true;
 				$combinedFiles[$combinerCheck[$file]] = true;
@@ -960,15 +960,15 @@ class Requirements_Backend {
 
 		// @todo Alters the original information, which means you can't call this
 		// method repeatedly - it will behave different on the second call!
-		$this->javascript = $newJSRequirements;
+		$this->js = $newJSRequirements;
 		$this->css = $newCSSRequirements;
   }
   
   function get_custom_scripts() {
 		$requirements = "";
 		
-		if($this->customScript) {
-			foreach($this->customScript as $script) {
+		if($this->customJS) {
+			foreach($this->customJS as $script) {
 				$requirements .= "$script\n";
 			}
 		}
@@ -994,10 +994,10 @@ class Requirements_Backend {
 	}
 	
 	function debug() {
-		Debug::show($this->javascript);
+		Debug::show($this->js);
 		Debug::show($this->css);
 		Debug::show($this->customCSS);
-		Debug::show($this->customScript);
+		Debug::show($this->customJS);
 		Debug::show($this->customHeadTags);
 		Debug::show($this->combine_files);
 	}

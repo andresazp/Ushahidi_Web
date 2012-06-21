@@ -36,12 +36,12 @@ class plugin_Core {
 		{
 			foreach($javascripts as $javascript)
 			{
-				Requirements::javascript('plugins/'.$javascript);
+				Requirements::js('plugins/'.$javascript);
 			}
 		}
 		else
 		{
-			Requirements::javascript('plugins/'.$javascripts);
+			Requirements::js('plugins/'.$javascripts);
 		}
 	}
 	

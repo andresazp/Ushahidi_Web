@@ -83,9 +83,9 @@ class Themes_Core {
 	{
 		Requirements::css("media/css/jquery-ui-themeroller");
 
-		Requirements::insertHeadTags("<!--[if lte IE 7]>".html::stylesheet($this->css_url."media/css/iehacks","",TRUE)."<![endif]-->",'iehacks');
-		Requirements::insertHeadTags("<!--[if IE 7]>".html::stylesheet($this->css_url."media/css/ie7hacks","",TRUE)."<![endif]-->",'ie7hacks');
-		Requirements::insertHeadTags("<!--[if IE 6]>".html::stylesheet($this->css_url."media/css/ie6hacks","",TRUE)."<![endif]-->",'ie6hacks');
+		Requirements::customHeadTags("<!--[if lte IE 7]>".html::stylesheet($this->css_url."media/css/iehacks","",TRUE)."<![endif]-->",'iehacks');
+		Requirements::customHeadTags("<!--[if IE 7]>".html::stylesheet($this->css_url."media/css/ie7hacks","",TRUE)."<![endif]-->",'ie7hacks');
+		Requirements::customHeadTags("<!--[if IE 6]>".html::stylesheet($this->css_url."media/css/ie6hacks","",TRUE)."<![endif]-->",'ie6hacks');
 
 		if ($this->map_enabled)
 		{
@@ -136,74 +136,74 @@ class Themes_Core {
 		$core_js = "";
 		if ($this->map_enabled)
 		{
-			Requirements::javascript("media/js/OpenLayers");
-			Requirements::customScript("OpenLayers.ImgPath = '".$this->js_url."media/img/openlayers/"."';",'openlayers-imgpath');
-			Requirements::javascript("media/js/ushahidi");
+			Requirements::js("media/js/OpenLayers");
+			Requirements::customJS("OpenLayers.ImgPath = '".$this->js_url."media/img/openlayers/"."';",'openlayers-imgpath');
+			Requirements::js("media/js/ushahidi");
 		}
 
-		Requirements::javascript("media/js/jquery");
-		//Requirements::javascript("media/js/jquery.ui.min");
-		Requirements::javascript("https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/jquery-ui.min.js");
-		Requirements::javascript("media/js/jquery.pngFix.pack");
-		Requirements::javascript("media/js/jquery.timeago");
+		Requirements::js("media/js/jquery");
+		//Requirements::js("media/js/jquery.ui.min");
+		Requirements::js("https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/jquery-ui.min.js");
+		Requirements::js("media/js/jquery.pngFix.pack");
+		Requirements::js("media/js/jquery.timeago");
 
 		if ($this->map_enabled)
 		{
 
-			//Requirements::customScript($this->api_url,'api_url');
-			Requirements::insertHeadTags($this->api_url);
+			//Requirements::customJS($this->api_url,'api_url');
+			Requirements::customHeadTags($this->api_url);
 
 			if ($this->main_page || $this->this_page == "alerts")
 			{
-				Requirements::javascript($this->js_url."media/js/selectToUISlider.jQuery");
+				Requirements::js($this->js_url."media/js/selectToUISlider.jQuery");
 			}
 
 			if ($this->main_page)
 			{
 				// Notes: E.Kala <emmanuel(at)ushahidi.com>
 				// TODO: Only include the jqplot JS when the timeline is enabled
-				Requirements::javascript("media/js/jquery.jqplot.min");
-				Requirements::javascript("media/js/jqplot.dateAxisRenderer.min");
+				Requirements::js("media/js/jquery.jqplot.min");
+				Requirements::js("media/js/jqplot.dateAxisRenderer.min");
 
-				Requirements::insertHeadTags("<!--[if IE]>".html::script($this->js_url."media/js/excanvas.min", TRUE)."<![endif]-->");
+				Requirements::customHeadTags("<!--[if IE]>".html::script($this->js_url."media/js/excanvas.min", TRUE)."<![endif]-->");
 			}
 		}
 
 		if ($this->treeview_enabled)
 		{
-			Requirements::javascript("media/js/jquery.treeview");
+			Requirements::js("media/js/jquery.treeview");
 		}
 
 		if ($this->validator_enabled)
 		{
-			Requirements::javascript("media/js/jquery.validate.min");
+			Requirements::js("media/js/jquery.validate.min");
 		}
 
 		if ($this->photoslider_enabled)
 		{
-			Requirements::javascript("media/js/picbox");
+			Requirements::js("media/js/picbox");
 		}
 
 		if ($this->videoslider_enabled)
 		{
-			Requirements::javascript("media/js/coda-slider.pack");
+			Requirements::js("media/js/coda-slider.pack");
 		}
 
 		if ($this->colorpicker_enabled)
 		{
-			Requirements::javascript("media/js/colorpicker");
+			Requirements::js("media/js/colorpicker");
 		}
 
-		Requirements::javascript("media/js/global");
+		Requirements::js("media/js/global");
 
 		if ($this->editor_enabled)
 		{
-			Requirements::javascript("media/js/jwysiwyg/jwysiwyg/jquery.wysiwyg.js");
+			Requirements::js("media/js/jwysiwyg/jwysiwyg/jquery.wysiwyg.js");
 		}
 
 		// Inline Javascript
-		Requirements::customScript('function runScheduler(img){ img.onload = null;img.src = \''.url::site().'scheduler'.'\';}'.'$(document).ready(function(){$(document).pngFix();});', 'pngfix');
-		Requirements::customScript($this->js,'pagejs');
+		Requirements::customJS('function runScheduler(img){ img.onload = null;img.src = \''.url::site().'scheduler'.'\';}'.'$(document).ready(function(){$(document).pngFix();});', 'pngfix');
+		Requirements::customJS($this->js,'pagejs');
 
 		// Filter::header_js - Modify Header Javascript
 		Event::run('ushahidi_filter.header_js', $inline_js);
