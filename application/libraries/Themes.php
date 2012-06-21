@@ -47,11 +47,14 @@ class Themes_Core {
 	 */
 	public function header_block()
 	{
-		$content = Kohana::config("globalcode.head").
-			$this->_header_css().
-			$this->_header_feeds().
-			$this->_header_js();
+		Requirements::customHeadTags(Kohana::config("globalcode.head"),'globalcode-head');
+		
+		// These just need to run now
+		$this->_header_css();
+		$this->_header_feeds();
+		$this->_header_js();
 
+		$content = '';
 		// Filter::header_block - Modify Header Block
 		Event::run('ushahidi_filter.header_block', $content);
 
@@ -64,8 +67,9 @@ class Themes_Core {
 	*/
 	public function admin_header_block()
 	{
-		$content = Kohana::config("globalcode.head");
+		Requirements::customHeadTags(Kohana::config("globalcode.head"),'globalcode-head');
 
+		$content = '';
 		// Filter::admin_header_block - Modify Admin Header Block
 		Event::run('ushahidi_filter.admin_header_block', $content);
 
@@ -115,11 +119,6 @@ class Themes_Core {
 
 		Requirements::css("media/css/global");
 		Requirements::css("media/css/jquery.jqplot.min");
-
-		// Render CSS
-		//$plugin_css = plugin::render('stylesheet');
-
-		return '';//$core_css.$plugin_css;
 	}
 
 	/**
@@ -129,7 +128,6 @@ class Themes_Core {
 	{
 		Requirements::set_write_js_to_body(FALSE);
 		
-		$core_js = "";
 		if ($this->map_enabled)
 		{
 			Requirements::js("media/js/OpenLayers");
@@ -200,11 +198,6 @@ class Themes_Core {
 		// Inline Javascript
 		Requirements::customJS('function runScheduler(img){ img.onload = null;img.src = \''.url::site().'scheduler'.'\';}'.'$(document).ready(function(){$(document).pngFix();});', 'pngfix');
 		Requirements::customJS($this->js,'pagejs');
-
-		// Filter::header_js - Modify Header Javascript
-		Event::run('ushahidi_filter.header_js', $inline_js);
-
-		return '';//$core_js.$plugin_js.$inline_js;
 	}
 
 	/**
@@ -212,13 +205,10 @@ class Themes_Core {
 	 */
 	private function _header_feeds()
 	{
-		$feeds = "";
 		if (Kohana::config("settings.allow_feed"))
 		{
-			$feeds .= "<link rel=\"alternate\" type=\"application/rss+xml\" href=\"".url::site()."feed/\" title=\"RSS2\" />";
+			Requirements::customHeadTags("<link rel=\"alternate\" type=\"application/rss+xml\" href=\"".url::site('feed')."\" title=\"RSS2\" />",'rss-feed');
 		}
-
-		return $feeds;
 	}
 
 	/**
