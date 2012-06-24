@@ -39,8 +39,8 @@ class Plugins_Controller extends Admin_Controller {
 
 		// If this is not a super-user account, redirect to dashboard
 		if(!$this->auth->logged_in('admin') && !$this->auth->logged_in('superadmin'))
-        {
-             url::redirect('admin/dashboard');
+		{
+			url::redirect('admin/dashboard');
 		}
 	}
 	
@@ -74,46 +74,13 @@ class Plugins_Controller extends Admin_Controller {
 		}
 		
 		// Add the hidden plugins to the list of plugins to filter out
-		if(count(Kohana::config('plugins.hide_from_list')) != 0){
+		if(count(Kohana::config('plugins.hide_from_list')) > 0){
 			$hide_from_list = array_map('mysql_real_escape_string',Kohana::config('plugins.hide_from_list'));
 			$filter .= ' AND plugin_name NOT IN (\''.implode("','",$hide_from_list).'\')';
 		}
 
-		$db = new Database();
-
-		// Update the plugin list in the database
-		$d = dir(PLUGINPATH);
-		$directories = array();
-		while (($entry = $d->read()) !== FALSE)
-		{
-			// Set the plugin to not enabled by default
-			// Don't include hidden folders
-			if ($entry[0] != '.') $directories[$entry] = FALSE;
-		}
+		$plugins = plugin::resync_plugins();
 		
-		// Sync the folder with the database
-		foreach ($directories as $dir => $found)
-		{
-			// Only include the plugin if it contains readme.txt
-			$file = PLUGINPATH.$dir."/readme.txt";
-			if ( file::file_exists_i($file) AND ! count($db->from('plugin')->where('plugin_name', $dir)->limit(1)->get()))
-			{
-				$plugin = ORM::factory('plugin');
-				$plugin->plugin_name = $dir;
-				$plugin->save();
-			}
-		}
-
-		// Remove Any Plugins not found in the plugins folder from the database
-		foreach (ORM::factory('plugin')->find_all() as $plugin)
-		{
-			$file = PLUGINPATH.$plugin->plugin_name."/readme.txt";
-			if ( ! array_key_exists($plugin->plugin_name, $directories) OR ! file::file_exists_i($file) )
-			{
-				$plugin->delete();
-			}
-		}		
-				
 		// check, has the form been submitted?
 		$form_error = FALSE;
 		$form_saved = FALSE;
@@ -146,7 +113,7 @@ class Plugins_Controller extends Admin_Controller {
 							$class = ucfirst($plugin->plugin_name).'_Install';
 							
 							// Find the Library File
-							$path = $this->_find_install($plugin->plugin_name);
+							$path = plugin::find_install($plugin->plugin_name);
 							if ($path)
 							{
 								include $path;
@@ -188,7 +155,7 @@ class Plugins_Controller extends Admin_Controller {
 							$class = ucfirst($plugin->plugin_name).'_Install';
 							
 							// Find the Library File
-							$path = $this->_find_install($plugin->plugin_name);
+							$path = plugin::find_install($plugin->plugin_name);
 							
 							if ($path)
 							{
@@ -211,7 +178,6 @@ class Plugins_Controller extends Admin_Controller {
 			{
 				$form_error = TRUE;
 			}
-
 		}
 		
 		$plugins = ORM::factory('plugin')
@@ -231,32 +197,4 @@ class Plugins_Controller extends Admin_Controller {
 		// Javascript Header
 		$this->template->js = new View('admin/addons/addons_js');
 	}
-	
-	/**
-	 * Using this function because someone somewhere will name this file wrong!!!
-	 */
-	private function _find_install($plugin_name)
-	{
-		if ($path = Kohana::find_file('libraries', $plugin_name.'_install'))
-		{ // plugin_i
-			return $path;
-		}
-		elseif ($path = Kohana::find_file('libraries', $plugin_name.'_Install'))
-		{ // plugin_I
-			return $path;
-		}
-		elseif ($path = Kohana::find_file('libraries', ucfirst($plugin_name).'_install'))
-		{ // Plugin_i
-			return $path;
-		}
-		elseif ($path = Kohana::find_file('libraries', ucfirst($plugin_name).'_Install'))
-		{ // Plugin_I
-			return $path;
-		}
-		else
-		{
-			return false;
-		}
-		
-	}	
 }
