@@ -54,7 +54,7 @@ class Themes_Core {
 		$this->_header_feeds();
 		$this->_header_js();
 
-		$content = '';
+		$content = Requirements::render('head');
 		// Filter::header_block - Modify Header Block
 		Event::run('ushahidi_filter.header_block', $content);
 
@@ -225,6 +225,8 @@ class Themes_Core {
 				$this->ushahidi_stats_js()."\n".
 				$this->cdn_gradual_upgrade()."\n".
 				$this->scheduler_js();
+		
+		$content .= Requirements::render('body');
 
 		// Filter::footer_block - Modify Footer Block
 		Event::run('ushahidi_filter.footer_block', $content);
