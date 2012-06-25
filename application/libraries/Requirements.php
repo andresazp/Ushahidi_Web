@@ -696,34 +696,35 @@ class Requirements_Backend {
 	 * @return string|boolean 
 	 */
 	protected function path_for_file($fileOrUrl, $type) {
-		// Add extension if not present
-		$suffix = ".$type";
-		$length = strlen($suffix);
-		if ( $length > 0 AND substr_compare($fileOrUrl, $suffix, -$length, $length, FALSE) !== 0)
-		{
-			// Add the defined suffix
-			$fileOrUrl .= $suffix;
-		}
-		
 		if(preg_match('/^http[s]?/', $fileOrUrl)) {
 			return $fileOrUrl;
-		} elseif (file_exists(DOCROOT . $fileOrUrl)) {
-			// Get url prefix, either site base url or CDN url
-			$prefix = url::file_loc($type);
-			
-			$mtimesuffix = "";
-			$suffix = '';
-			if(strpos($fileOrUrl, '?') !== false) {
-				$suffix = '&' . substr($fileOrUrl, strpos($fileOrUrl, '?')+1);
-				$fileOrUrl = substr($fileOrUrl, 0, strpos($fileOrUrl, '?'));
-			}
-			if($this->suffix_requirements) {
-				$mtimesuffix = "?m=" . filemtime(DOCROOT . $fileOrUrl);
-			}
-			return "{$prefix}{$fileOrUrl}{$mtimesuffix}{$suffix}";
 		} else {
-			return false;
+			// Add extension if not present
+			$suffix = ".$type";
+			$length = strlen($suffix);
+			if ( $length > 0 AND substr_compare($fileOrUrl, $suffix, -$length, $length, FALSE) !== 0)
+			{
+				// Add the defined suffix
+				$fileOrUrl .= $suffix;
+			}
+			
+			if (file_exists(DOCROOT . $fileOrUrl)) {
+				// Get url prefix, either site base url or CDN url
+				$prefix = url::file_loc($type);
+				
+				$mtimesuffix = "";
+				$suffix = '';
+				if(strpos($fileOrUrl, '?') !== false) {
+					$suffix = '&' . substr($fileOrUrl, strpos($fileOrUrl, '?')+1);
+					$fileOrUrl = substr($fileOrUrl, 0, strpos($fileOrUrl, '?'));
+				}
+				if($this->suffix_requirements) {
+					$mtimesuffix = "?m=" . filemtime(DOCROOT . $fileOrUrl);
+				}
+				return "{$prefix}{$fileOrUrl}{$mtimesuffix}{$suffix}";
+			}
 		}
+		return false;
 	}
 	
 	/**
