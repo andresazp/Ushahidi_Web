@@ -112,13 +112,13 @@ class Themes_Core {
 			Requirements::css("media/css/colorpicker");
 		}
 
-		if ($this->site_style AND $this->site_style != "default")
-		{
-			Requirements::css("themes/".$site_style."/style.css");
-		}
-
 		Requirements::css("media/css/global");
 		Requirements::css("media/css/jquery.jqplot.min");
+		
+		foreach(Kohana::config('settings.site_style_css') as $css)
+		{
+			Requirements::css($css);
+		}
 	}
 
 	/**
@@ -191,6 +191,11 @@ class Themes_Core {
 		if ($this->editor_enabled)
 		{
 			Requirements::js("media/js/jwysiwyg/jwysiwyg/jquery.wysiwyg.js");
+		}
+		
+		foreach(Kohana::config('settings.site_style_js') as $js)
+		{
+			Requirements::js($js);
 		}
 
 		// Inline Javascript
