@@ -72,7 +72,7 @@
 								<strong><u><?php echo Kohana::lang('ui_main.contact');?></u></strong>: <?php echo $theme['Author Email'] ?><BR />
 								<strong><u><?php echo Kohana::lang('ui_main.location');?></u></strong>: <i>/themes/<?php echo $theme_key ?>/</i>
 								<label class="theme_select" style="display: block;">
-									<input type="radio" name="site_style" value="<?php echo $theme['Template_Dir'] ?>" <?php
+									<input type="radio" name="site_style" value="<?php echo $theme_key ?>" <?php
 									if ($theme_key == $form['site_style'])
 									{
 										echo "checked = \"checked\"";
