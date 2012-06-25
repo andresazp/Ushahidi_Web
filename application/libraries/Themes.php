@@ -143,9 +143,7 @@ class Themes_Core {
 
 		if ($this->map_enabled)
 		{
-
-			//Requirements::customJS($this->api_url,'api_url');
-			Requirements::customHeadTags($this->api_url);
+			Requirements::js($this->api_url);
 
 			if ($this->main_page || $this->this_page == "alerts")
 			{

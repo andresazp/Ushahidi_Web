@@ -87,12 +87,10 @@ $cache_pages = ($settings['cache_pages']) ? TRUE : FALSE;
 Kohana::config_set('cache.cache_pages', $cache_pages);
 Kohana::config_set('cache.default.lifetime', $settings['cache_pages_lifetime']);
 
-$default_map = $settings['default_map'];
-$map_layer = map::base($default_map);
-if (isset($map_layer->api_url) AND $map_layer->api_url != '')
+$map_layer = map::base($settings['default_map']);
+if (! empty($map_layer->api_url))
 {
-	Kohana::config_set('settings.api_url', 
-		"<script type=\"text/javascript\" src=\"".$map_layer->api_url."\"></script>");
+	Kohana::config_set('settings.api_url', $map_layer->api_url);
 }
 
 // And in case you want to display all maps on one page...

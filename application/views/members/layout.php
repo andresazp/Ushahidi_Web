@@ -30,7 +30,7 @@
 	if ($map_enabled)
 	{
 		echo html::script(url::file_loc('js').'media/js/OpenLayers', TRUE);
-		echo $api_url . "\n";
+		echo html::script($api_url) . "\n";
 		echo "<script type=\"text/javascript\">
 			OpenLayers.ImgPath = '".url::file_loc('img').'media/img/openlayers/'."';
 			</script>";
