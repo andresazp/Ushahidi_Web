@@ -196,8 +196,6 @@
 	echo html::stylesheet(url::file_loc('css').'media/css/global','',TRUE);
 
 	// Render CSS and Javascript Files from Plugins
-	echo plugin::render('stylesheet');
-	echo plugin::render('javascript');
 
 	// Action::header_scripts_admin - Additional Inline Scripts
 	Event::run('ushahidi_action.header_scripts_admin');
