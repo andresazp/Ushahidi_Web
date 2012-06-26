@@ -250,11 +250,9 @@ ul {
 #tooltip-box {
 	display: none;
 }
-
 /* Map container divs - must have a height set*/
 .f-location-box .rb_location-radius {
-	width: 255px;
-	height: 275px;
+	width: 259px; height: 280px;
 }
 #rb_map-view {
 	display: none;

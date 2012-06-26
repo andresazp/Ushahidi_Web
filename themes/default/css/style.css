@@ -1338,18 +1338,19 @@ a.show-more {
     padding:0 0 8px;
     font:12px/15px Arial, Helvetica, sans-serif;
 }
-.step-1 .map {
+.step-1 .map-wrapper {
     overflow:hidden;
     width:407px;
     padding:10px;
     margin:10px 0 0 0;
+    border: #999 1px solid;
 }
-.step-1 .map p {
+.step-1 .map-wrapper p {
     margin:0;
     padding:0 0 6px;
     font:12px/15px Arial, Helvetica, sans-serif;
 }
-.step-1 .map .map-holder {
+.step-1 .map-wrapper .map-holder {
     overflow:hidden;
     width:387px;
     height:325px;
@@ -2133,8 +2134,7 @@ a.btn-show { display:none; }
 
 /* Filter content boxes */
 .f-category-box { height:258px; }
-.f-location-box .map { width: 259px !important; height: 280px !important; padding: 0; margin: 0;}
-.f-location-box .rb_location-radius { width: 255px; height: 275px; }
+.f-location-box .rb_location-radius { width: 259px; height: 280px; border: #999 1px solid; }
 .f-type-box {}
 .f-verification-box {}
 .f-media-box {}
