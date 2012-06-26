@@ -2107,31 +2107,6 @@ a.btn-show { display:none; }
 .loading-reports {width: 100%; margin-top: 100px; text-align: center;}
 .loading-reports h3 { padding: 10px 2px; }
 
-/* jquery UI theme overrides for accordion */
-#accordion .ui-accordion-header .ui-icon { right:.5em; }
-.ui-accordion .ui-accordion-header a { padding:0.5em 2.2em 0.5em 0.5em; color:#797979; font-weight:bold; }
-#accordion .ui-accordion-header .small-link-button { 
-    position:absolute; 
-    top:0;
-    right:0;
-    display:inline-block;
-    font-size:.9em;
-    font-weight:normal;
-    text-decoration:underline;
-}
-
-/* Active state */
-.ui-state-active, .ui-widget-content .ui-state-active { background:#efefef url(../images/bg_filter-accordion-title.png) top repeat-x; }
-.ui-state-active a.f-title { color:#2f4079; }
-.ui-accordion .ui-accordion-content { background:#efefef; }
-
-/* Content area */
-.ui-accordion .ui-accordion-content { padding:0 8px 18px 8px; font-size:11px; }
-.ui-accordion .ui-accordion-content p { margin-bottom:8px; } 
-.ui-accordion .ui-accordion-content a { color:#1f5e82;  }
-.ui-accordion .ui-accordion-content a.reset,
-.ui-accordion .ui-accordion-header a.reset, a.reset { color:#981e01;  }
-
 /* Filter content boxes */
 .f-category-box { height:258px; }
 .f-location-box .rb_location-radius { width: 259px; height: 280px; border: #999 1px solid; }
