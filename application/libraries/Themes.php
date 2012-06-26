@@ -135,7 +135,7 @@ class Themes_Core {
 		if ($this->map_enabled)
 		{
 			Requirements::js("media/js/OpenLayers");
-			Requirements::customJS("OpenLayers.ImgPath = '".$this->js_url."media/img/openlayers/"."';",'openlayers-imgpath');
+			Requirements::customJS("OpenLayers.ImgPath = '".url::file_loc('js')."media/img/openlayers/"."';",'openlayers-imgpath');
 			Requirements::js("media/js/ushahidi");
 		}
 
