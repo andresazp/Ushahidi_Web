@@ -87,8 +87,8 @@
 				?>
 				<div id="<?php echo $incident_id ?>" class="rb_report <?php echo $incident_verified_class; ?>">
 					<div class="r_media">
-						<p class="r_photo" style="text-align:center;"> <a href="<?php echo url::site(); ?>reports/view/<?php echo $incident_id; ?>">
-							<img src="<?php echo $incident_thumb; ?>" style="max-width:89px;max-height:59px;" /> </a>
+						<p class="r_photo"> <a href="<?php echo url::site(); ?>reports/view/<?php echo $incident_id; ?>">
+							<img src="<?php echo $incident_thumb; ?>" /> </a>
 						</p>
 
 						<!-- Only show this if the report has a video -->
@@ -144,7 +144,7 @@
 				</div>
 			<?php } ?>
 			</div>
-			<div id="rb_map-view" style="display:none; width: 590px; height: 384px; border:1px solid #CCCCCC; margin: 3px auto;">
+			<div id="rb_map-view">
 			</div>
 		</div>
 		<!-- /Report listing -->
