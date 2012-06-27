@@ -81,7 +81,10 @@ class addon_Core {
 				'Author' => "",
 				'Author Email' => "",
 				'Template_Dir' => "",
-				'Checkins' => 0
+				'Checkins' => 0,
+				'Base Theme' => 'default',
+				'CSS' => '',
+				'JS' => '',
 			);
 		}
 
