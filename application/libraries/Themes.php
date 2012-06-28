@@ -194,7 +194,6 @@ class Themes_Core {
 		}
 
 		// Inline Javascript
-		Requirements::customJS('function runScheduler(img){ img.onload = null;img.src = \''.url::site().'scheduler'.'\';}'.'$(document).ready(function(){$(document).pngFix();});', 'pngfix');
 		Requirements::customJS($this->js,'pagejs');
 	}
 
