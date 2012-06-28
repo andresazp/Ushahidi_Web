@@ -22,7 +22,7 @@
 	echo html::stylesheet(url::file_loc('css').'media/css/admin/all', '', TRUE);
 	echo html::stylesheet(url::file_loc('css').'media/css/jquery-ui-themeroller', '', TRUE);
 	echo "<!--[if lt IE 7]>".
-		html::stylesheet(url::file_loc('css').'media/css/ie6', '', TRUE)
+		html::stylesheet(url::file_loc('css').'media/css/admin/ie6', '', TRUE)
 		."<![endif]-->";
 
 	// Load OpenLayers
