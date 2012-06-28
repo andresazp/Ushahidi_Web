@@ -448,7 +448,7 @@ div.slider-holder label{
     padding:3px 6px 3px 15px;
     color:#666;
     font-weight:bold;
-    background-image:url(../images/arrow-play.gif);
+    background-image:url(../../../media/img/arrow-play.gif);
     background-position:5px 50%;
     background-repeat:no-repeat;
     font-size:1.2em;
@@ -1198,9 +1198,9 @@ a.add, a.rem{
     width:13px;
     height:13px;
     float:left;
-    background:url(../images/icon-plus.gif) no-repeat;
+    background:url(../../../media/img/icon-plus.gif) no-repeat;
 }
-a.rem { background:url(../images/icon-minus.gif) no-repeat;}
+a.rem { background:url(../../../media/img/icon-minus.gif) no-repeat;}
 .report_map{
     overflow:hidden;
     width:100%;
@@ -1241,7 +1241,7 @@ a.show-more {
     text-decoration:underline;
     font-size:10px;
     padding:1px 0 0 18px;
-    background:url(../images/icon-plus.gif) no-repeat 0 2px;
+    background:url(../../../media/img/icon-plus.gif) no-repeat 0 2px;
     float:right;
     margin-right:23px;
 }
