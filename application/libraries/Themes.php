@@ -23,7 +23,6 @@ class Themes_Core {
 	public $treeview_enabled = false;
 	public $validator_enabled = false;
 	public $photoslider_enabled = false;
-	public $videoslider_enabled = false;
 	public $colorpicker_enabled = false;
 	public $editor_enabled = false;
 	public $site_style = false;
@@ -103,11 +102,6 @@ class Themes_Core {
 			Requirements::css("media/css/picbox/picbox");
 		}
 
-		if ($this->videoslider_enabled)
-		{
-			Requirements::css("media/css/videoslider");
-		}
-
 		if ($this->colorpicker_enabled)
 		{
 			Requirements::css("media/css/colorpicker");
@@ -180,11 +174,6 @@ class Themes_Core {
 		if ($this->photoslider_enabled)
 		{
 			Requirements::js("media/js/picbox");
-		}
-
-		if ($this->videoslider_enabled)
-		{
-			Requirements::js("media/js/coda-slider.pack");
 		}
 
 		if ($this->colorpicker_enabled)
