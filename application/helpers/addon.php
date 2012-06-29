@@ -9,41 +9,6 @@
  * @license    http://www.ushahidi.com/license.html
  */
 class addon_Core {
-
-	/**
-	 * Temporarily load a config file.
-	 *
-	 * @param string $name config filename, without extension
-	 * @param boolean $required is the file required?
-	 * @return array
-	 */
-	public static function config_load($plugin, $name, $required = TRUE)
-	{
-		if (isset(self::$internal_cache['configuration'][$name]))
-			return self::$internal_cache['configuration'][$name];
-
-		// Load matching configs
-		$configuration = array();
-		
-		$file = PLUGINPATH.$name.'/config/'.$name.'.php';
-		if ( file_exists($file) )
-		{
-			require $file;
-			if (isset($config) AND is_array($config))
-			{
-				// Merge in configuration
-				$configuration = array_merge($configuration, $config);
-			}
-		}
-
-		if ( ! isset(self::$write_cache['configuration']))
-		{
-			// Cache has changed
-			self::$write_cache['configuration'] = TRUE;
-		}
-
-		return self::$internal_cache['configuration'][$name] = $configuration;
-	}
 	
 	/**
 	 * Find addons in theme/plugin dir
