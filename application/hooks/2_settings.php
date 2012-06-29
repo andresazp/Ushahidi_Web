@@ -96,11 +96,11 @@ if (! empty($map_layer->api_url))
 // And in case you want to display all maps on one page...
 $api_google = $settings['api_google'];
 $api_live = $settings['api_live'];
-Kohana::config_set('settings.api_url_all', 
-	"<script type=\"text/javascript\" src=\"https://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=6\"></script>\n"
-	."<script type=\"text/javascript\" src=\"https://maps.google.com/maps/api/js?v=3.2&amp;sensor=false\"></script>\n"
-	. html::script('https://www.openstreetmap.org/openlayers/OpenStreetMap.js')
-);
+Kohana::config_set('settings.api_url_all', array(
+	"https://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=6",
+	"https://maps.google.com/maps/api/js?v=3.2&amp;sensor=false",
+	'https://www.openstreetmap.org/openlayers/OpenStreetMap.js',
+));
 
 // Additional Mime Types (KMZ/KML)
 Kohana::config_set('mimes.kml', array('text/xml'));

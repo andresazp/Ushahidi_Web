@@ -285,7 +285,7 @@ class Reports_Controller extends Admin_Controller {
 		$this->template->content->status = $status;
 
 		// Javascript Header
-		$this->template->js = new View('admin/reports/reports_js');
+		$this->themes->js = new View('admin/reports/reports_js');
 	}
 
 	/**
@@ -784,29 +784,29 @@ class Reports_Controller extends Admin_Controller {
 		$this->template->content->next_url = $next_url;
 
 		// Javascript Header
-		$this->template->map_enabled = TRUE;
-		$this->template->colorpicker_enabled = TRUE;
-		$this->template->treeview_enabled = TRUE;
-		$this->template->json2_enabled = TRUE;
+		$this->themes->map_enabled = TRUE;
+		$this->themes->colorpicker_enabled = TRUE;
+		$this->themes->treeview_enabled = TRUE;
+		$this->themes->json2_enabled = TRUE;
 
-		$this->template->js = new View('reports/submit_edit_js');
-		$this->template->js->edit_mode = TRUE;
-		$this->template->js->default_map = Kohana::config('settings.default_map');
-		$this->template->js->default_zoom = Kohana::config('settings.default_zoom');
+		$this->themes->js = new View('reports/submit_edit_js');
+		$this->themes->js->edit_mode = TRUE;
+		$this->themes->js->default_map = Kohana::config('settings.default_map');
+		$this->themes->js->default_zoom = Kohana::config('settings.default_zoom');
 
 		if ( ! $form['latitude'] OR !$form['latitude'])
 		{
-			$this->template->js->latitude = Kohana::config('settings.default_lat');
-			$this->template->js->longitude = Kohana::config('settings.default_lon');
+			$this->themes->js->latitude = Kohana::config('settings.default_lat');
+			$this->themes->js->longitude = Kohana::config('settings.default_lon');
 		}
 		else
 		{
-			$this->template->js->latitude = $form['latitude'];
-			$this->template->js->longitude = $form['longitude'];
+			$this->themes->js->latitude = $form['latitude'];
+			$this->themes->js->longitude = $form['longitude'];
 		}
 
-		$this->template->js->incident_zoom = $form['incident_zoom'];
-		$this->template->js->geometries = $form['geometry'];
+		$this->themes->js->incident_zoom = $form['incident_zoom'];
+		$this->themes->js->geometries = $form['geometry'];
 
 		// Inline Javascript
 		$this->template->content->date_picker_js = $this->_date_picker_js();
@@ -814,8 +814,8 @@ class Reports_Controller extends Admin_Controller {
 		$this->template->content->new_category_toggle_js = $this->_new_category_toggle_js();
 
 		// Pack Javascript
-		$myPacker = new javascriptpacker($this->template->js , 'Normal', false, false);
-		$this->template->js = $myPacker->pack();
+		$myPacker = new javascriptpacker($this->themes->js , 'Normal', false, false);
+		$this->themes->js = $myPacker->pack();
 	}
 
 
@@ -1128,8 +1128,8 @@ class Reports_Controller extends Admin_Controller {
 		$this->template->content->form_error = $form_error;
 
 		// Javascript Header
-		$this->template->js = new View('admin/reports/download_js');
-		$this->template->js->calendar_img = url::base() . "media/img/icon-calendar.gif";
+		$this->themes->js = new View('admin/reports/download_js');
+		$this->themes->js->calendar_img = url::base() . "media/img/icon-calendar.gif";
 	}
 
 	public function upload()
