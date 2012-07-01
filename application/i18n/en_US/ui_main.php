@@ -557,6 +557,7 @@
 	'version' => 'Version',
 	'via' => 'via',
 	'video' => 'Video',
+	'view_video' => 'View video',
 	'view' => 'View',
 	'views' => 'Views',
 	'view_all' => 'View All',

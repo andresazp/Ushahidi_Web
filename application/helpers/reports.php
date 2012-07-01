@@ -439,15 +439,32 @@ class reports_Core {
 		// b. Video
 		if (isset($post->incident_video))
 		{
+			$videoembed = new VideoEmbed();
 			foreach ($post->incident_video as $item)
 			{
 				if ( ! empty($item))
 				{
+					$video_thumb = $videoembed->thumb($item);
+					if ($video_thumb)
+					{
+						$new_filename = $incident->id.'_'..'_'.time();
+						file_put_contents(Kohana::config('upload.directory', TRUE).$new_filename, file_get_contents($url));
+	
+						// Medium size
+						Image::factory($new_filename)->resize(400,300,Image::HEIGHT)
+							->save(Kohana::config('upload.directory', TRUE).$new_filename.'_m'.$file_type);
+	
+						// Thumbnail
+						Image::factory($new_filename)->resize(89,59,Image::HEIGHT)
+							->save(Kohana::config('upload.directory', TRUE).$new_filename.'_t'.$file_type);
+					}
+					
 					$video = new Media_Model();
 					$video->location_id = $incident->location_id;
 					$video->incident_id = $incident->id;
 					$video->media_type = 2;		// Video
 					$video->media_link = $item;
+					$video->medit_thumb = 
 					$video->media_date = date("Y-m-d H:i:s",time());
 					$video->save();
 				}
