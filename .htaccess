@@ -6,6 +6,12 @@
 	# Installation directory
 	RewriteBase /
 
+	#RewriteCond %{HTTP_HOST} !^www.cartehumanitaire-rca.org
+	#RewriteRule (.*) https://www.cartehumanitaire-rca.org/$1 [R=301,L]
+
+	#RewriteCond %{HTTPS} off
+	#RewriteRule (.*) https://www.cartehumanitaire-rca.org/$1 [R=301,L]
+
 	# Protect application and system files from being viewed
 	RewriteRule ^(application|modules|system|tests|sql) - [F,L]
 
