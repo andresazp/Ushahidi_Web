@@ -22,19 +22,19 @@ class Incidents_Api_Object extends Api_Object_Core {
 	 * Record sorting order ASC or DESC
 	 * @var string
 	 */
-	protected $sort;
+	private $sort;
 
 	/**
 	 * Column name by which to order the records
 	 * @var string
 	 */
-	protected $order_field;
+	private $order_field;
 
 	/**
 	 * Should the response include comments
 	 * @var string
 	 */
-	protected $comments;
+	private $comments;
 
 	/**
 	 * Constructor
@@ -287,7 +287,7 @@ class Incidents_Api_Object extends Api_Object_Core {
 	 * Checks for optional parameters in the request and sets the values
 	 * in the respective class members
 	 */
-	protected function _check_optional_parameters()
+	private function _check_optional_parameters()
 	{
 		// Check if the sort parameter has been specified
 		if ($this->api_service->verify_array_index($this->request, 'sort'))
@@ -348,6 +348,7 @@ class Incidents_Api_Object extends Api_Object_Core {
 	 * Generic function to get reports by given set of parameters
 	 *
 	 * @param string $where SQL where clause
+	 * @param int $limit No. of records to return - set to 20 by default
 	 * @return string XML or JSON string
 	 */
 	public function _get_incidents($where = array())
