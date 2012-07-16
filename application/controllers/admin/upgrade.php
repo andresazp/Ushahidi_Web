@@ -45,7 +45,7 @@ class Upgrade_Controller extends Admin_Controller {
 	 */
 	public function index()
 	{
-		$this->template->content = new View('admin/upgrade');
+		$this->template->content = new View('admin/upgrade/upgrade');
 
 		$form_action = "";
 		
@@ -75,8 +75,8 @@ class Upgrade_Controller extends Admin_Controller {
 			if ($post->validate())
 			{
 				$this->upgrade->logger("STARTED UPGRADE\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-				$this->template->content = new View('admin/upgrade_status');
-				$this->template->js = new View('admin/upgrade_status_js');
+				$this->template->content = new View('admin/upgrade/upgrade_status');
+				$this->template->js = new View('admin/upgrade/upgrade_status_js');
 				$this->template->js->backup = $post->chk_db_backup_box;
 				$this->template->content->title = Kohana::lang('ui_admin.upgrade_ushahidi_status');
 				
@@ -84,10 +84,8 @@ class Upgrade_Controller extends Admin_Controller {
 				$this->session->set('ftp_user_name', $post->ftp_user_name);
 				$this->session->set('ftp_user_pass', $post->ftp_user_pass);
 				
-				$settings = ORM::factory("settings")->find(1);
-				$settings->ftp_server = $post->ftp_server;
-				$settings->ftp_user_name = $post->ftp_user_name;
-				$settings->save();
+				Settings_Model::save_setting('ftp_server', $post->ftp_server);
+				Settings_Model::save_setting('ftp_user_name', $post->ftp_user_name);
 				
 				// Log file location
 				$this->template->js->log_file = url::site(). "admin/upgrade/logfile?f=".$this->session->get('upgrade_session').".txt";
@@ -95,7 +93,7 @@ class Upgrade_Controller extends Admin_Controller {
 			 // No! We have validation errors, we need to show the form again, with the errors
 			else
 			{
-				$this->template->js = new View('admin/upgrade_js');
+				$this->template->js = new View('admin/upgrade/upgrade_js');
 				
 				// repopulate the form fields
 				$form = arr::overwrite($form, $post->as_array());
@@ -107,12 +105,11 @@ class Upgrade_Controller extends Admin_Controller {
 		}
 		else
 		{
-			$this->template->js = new View('admin/upgrade_js');
+			$this->template->js = new View('admin/upgrade/upgrade_js');
 		}
 		
-		$settings = ORM::factory("settings")->find(1);
-		$this->template->content->ftp_server = $settings->ftp_server;
-		$this->template->content->ftp_user_name = $settings->ftp_user_name;
+		$this->template->content->ftp_server = Settings_Model::get_setting('ftp_server');
+		$this->template->content->ftp_user_name = Settings_Model::get_setting('ftp_user_name');
 		
 		$this->template->content->form_action = $form_action;
 		$this->template->content->current_version = Kohana::config('settings.ushahidi_version');
@@ -137,7 +134,7 @@ class Upgrade_Controller extends Admin_Controller {
 		if ($step == 0)
 		{
 			$this->upgrade->logger("Downloading latest version of ushahidi...");
-			echo json_encode(array("status"=>"success", "message"=>"Downloading latest version of ushahidi..."));
+			echo json_encode(array("status"=>"success", "message"=> Kohana.lang('upgrade.download')));
 		}
 		
 		if ($step == 1)
@@ -157,12 +154,12 @@ class Upgrade_Controller extends Admin_Controller {
 			{
 				$this->upgrade->write_to_file($latest_ushahidi, $zip_file);
 				$this->upgrade->logger("Successfully Downloaded. Unpacking ".$zip_file);
-				echo json_encode(array("status"=>"success", "message"=>"Successfully Downloaded. Unpacking..."));
+				echo json_encode(array("status"=>"success", "message"=> Kohana::lang('upgrade.successfully_downloaded')));
 			}
 			else
 			{
 				$this->upgrade->logger("** Failed downloading.\n\n");
-				echo json_encode(array("status"=>"error", "message"=>"Failed downloading."));
+				echo json_encode(array("status"=>"error", "message"=> Kohana::lang('upgrade.failed_downloading')));
 			}
 		}
 		
@@ -176,12 +173,12 @@ class Upgrade_Controller extends Admin_Controller {
 			if ($this->upgrade->success)
 			{
 				$this->upgrade->logger("Successfully Unpacked. Copying files...");
-				echo json_encode(array("status"=>"success", "message"=>"Successfully Unpacked. Copying files..."));
+				echo json_encode(array("status"=>"success", "message"=>Kohana::lang('upgrade.successfully_unpacked')));
 			}
 			else
 			{
 				$this->upgrade->logger("** Failed unpacking.\n\n");
-				echo json_encode(array("status"=>"error", "message"=>"Failed unpacking."));
+				echo json_encode(array("status"=>"error", "message"=>Kohana::lang('upgrade.failed_unpacking')));
 			}
 		}
 
@@ -195,12 +192,12 @@ class Upgrade_Controller extends Admin_Controller {
 			if ($this->upgrade->success)
 			{
 				$this->upgrade->logger("Successfully Copied. Upgrading Database...");
-				echo json_encode(array("status"=>"success", "message"=>"Successfully Copied. Upgrading Database..."));
+				echo json_encode(array("status"=>"success", "message"=>Kohana::lang('upgrade.successfully_copied')));
 			}
 			else
 			{
 				$this->upgrade->logger("** Failed copying files.\n\n");
-				echo json_encode(array("status"=>"error", "message"=>"Failed copying files."));
+				echo json_encode(array("status"=>"error", "message"=>Kohana::lang('upgrade.failed_copying')));
 			}
 		}
 		
@@ -220,12 +217,12 @@ class Upgrade_Controller extends Admin_Controller {
 					$this->_process_db_upgrade($working_dir."ushahidi/sql/");
 				}
 				$this->upgrade->logger("Database backup and upgrade successful.");
-				echo json_encode(array("status"=>"success", "message"=>"Database backup and upgrade successful."));
+				echo json_encode(array("status"=>"success", "message"=>Kohana::lang('upgrade.backup_success')));
 			}
 			else
 			{
 				$this->upgrade->logger("** Failed backing up database.\n\n");
-				echo json_encode(array("status"=>"error", "message"=>"Failed backing up database."));
+				echo json_encode(array("status"=>"error", "message"=>Kohana::lang('upgrade.backup_failed')));
 			}
 		}
 		
@@ -238,12 +235,12 @@ class Upgrade_Controller extends Admin_Controller {
 				//upgrade tables
 				$this->_process_db_upgrade($working_dir."ushahidi/sql/");
 				$this->upgrade->logger("Database upgrade successful.");
-				echo json_encode(array("status"=>"success", "message"=>"Database upgrade successful."));
+				echo json_encode(array("status"=>"success", "message"=>Kohana::lang('upgrade.dbupgrade_success')));
 			}
 			else
 			{
 				$this->upgrade->logger("Database upgrade successful.");
-				echo json_encode(array("status"=>"success", "message"=>"Database upgrade successful."));
+				echo json_encode(array("status"=>"success", "message"=>Kohana::lang('upgrade.dbupgrade_success')));
 			}
 		}
 		
@@ -251,14 +248,17 @@ class Upgrade_Controller extends Admin_Controller {
 		if ($step == 6)
 		{
 			$this->upgrade->logger("Deleting downloaded files...");
-			echo json_encode(array("status"=>"success", "message"=>"Deleting downloaded files..."));
+			echo json_encode(array("status"=>"success", "message"=>Kohana::lang('upgrade.deleting_files')));
 		}
 		
 		if ($step == 7)
 		{
 			$this->upgrade->remove_recursively($working_dir);
 			$this->upgrade->logger("UPGRADE SUCCESSFUL");
-			echo json_encode(array("status"=>"success", "message"=>"UPGRADE SUCCESSFUL. View <a href=\"".url::site(). "admin/upgrade/logfile?f=".$this->session->get('upgrade_session').".txt"."\" target=\"_blank\">Log File</a>"));
+			echo json_encode(array(
+					"status"=>"success",
+					"message"=> Kohana::lang('upgrade.upgrade_success', array( url::site("admin/upgrade/logfile?f=".$this->session->get('upgrade_session').".txt") ))
+			));
 			
 			$this->session->delete('upgrade_session');
 		}
@@ -383,11 +383,8 @@ class Upgrade_Controller extends Admin_Controller {
 	private function _get_db_version()
 	{
 			
-	   // get the db version from the settings page
-		$this->db = new Database();
-		$sql = 'SELECT db_version from '.Kohana::config('database.default.table_prefix').'settings';
-		$settings = $this->db->query($sql);
-		$version_in_db = $settings[0]->db_version;
+		// get the db version from the settings page
+		$version_in_db = Settings_Model::get_setting('db_version');
 		
 		// Update DB
 		$db_version = $version_in_db;

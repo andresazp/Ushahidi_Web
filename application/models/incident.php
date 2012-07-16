@@ -47,12 +47,6 @@ class Incident_Model extends ORM {
 	);
 
 	/**
-	 * Many-to-one relationship definition
-	 * @var array
-	 */
-	protected $belongs_to = array('sharing');
-
-	/**
 	 * Database table name
 	 * @var string
 	 */
@@ -348,7 +342,7 @@ class Incident_Model extends ORM {
 	 * @param string $sort How to order the records - only ASC or DESC are allowed
 	 * @return Database_Result
 	 */
-	public static function get_incidents($where = array(), $limit = NULL, $order_field = NULL, $sort = NULL)
+	public static function get_incidents($where = array(), $limit = NULL, $order_field = NULL, $sort = NULL, $count = FALSE)
 	{
 		// Get the table prefix
 		$table_prefix = Kohana::config('database.default.table_prefix');
@@ -366,9 +360,18 @@ class Incident_Model extends ORM {
 		}
 
 		// Query
-		$sql = 'SELECT DISTINCT i.id incident_id, i.incident_title, i.incident_description, i.incident_date, i.incident_mode, i.incident_active, '
-			. 'i.incident_verified, i.location_id, l.country_id, l.location_name, l.latitude, l.longitude ';
-
+		// Normal query
+		if (! $count)
+		{
+			$sql = 'SELECT DISTINCT i.id incident_id, i.incident_title, i.incident_description, i.incident_date, i.incident_mode, i.incident_active, '
+				. 'i.incident_verified, i.location_id, l.country_id, l.location_name, l.latitude, l.longitude ';
+		}
+		// Count query
+		else
+		{
+			$sql = 'SELECT COUNT(DISTINCT i.id) as report_count ';
+		}
+		
 		// Check if all the parameters exist
 		if (count($radius) > 0 AND array_key_exists('latitude', $radius) AND array_key_exists('longitude', $radius)
 			AND array_key_exists('distance', $radius))
@@ -384,9 +387,9 @@ class Incident_Model extends ORM {
 		}
 
 		$sql .=  'FROM '.$table_prefix.'incident i '
-			. 'INNER JOIN '.$table_prefix.'location l ON (i.location_id = l.id) '
-			. 'INNER JOIN '.$table_prefix.'incident_category ic ON (ic.incident_id = i.id) '
-			. 'INNER JOIN '.$table_prefix.'category c ON (ic.category_id = c.id) ';
+			. 'LEFT JOIN '.$table_prefix.'location l ON (i.location_id = l.id) '
+			. 'LEFT JOIN '.$table_prefix.'incident_category ic ON (ic.incident_id = i.id) '
+			. 'LEFT JOIN '.$table_prefix.'category c ON (ic.category_id = c.id) ';
 		
 		// Check if the all reports flag has been specified
 		if (array_key_exists('all_reports', $where) AND $where['all_reports'] == TRUE)
@@ -408,6 +411,8 @@ class Incident_Model extends ORM {
 			}
 		}
 
+		// Might need "GROUP BY i.id" do avoid dupes
+		
 		// Add the having clause
 		$sql .= $having_clause;
 
@@ -432,11 +437,7 @@ class Incident_Model extends ORM {
 		}
 
 		// Kohana::log('debug', $sql);
-		// Database instance for the query
-		$db = new Database();
-
-		// Return
-		return $db->query($sql);
+		return Database::instance()->query($sql);
 	}
 
 	/**
@@ -497,8 +498,6 @@ class Incident_Model extends ORM {
 				. "	COS(l.`latitude` * PI() / 180) * COS(( ? - l.`longitude`) * PI() / 180)) * 180 / PI()) * 60 * 1.1515) AS distance "
 				. "FROM `".$table_prefix."incident` AS i "
 				. "INNER JOIN `".$table_prefix."location` AS l ON (l.`id` = i.`location_id`) "
-				. "INNER JOIN `".$table_prefix."incident_category` AS ic ON (i.`id` = ic.`incident_id`) "
-				. "INNER JOIN `".$table_prefix."category` AS c ON (ic.`category_id` = c.`id`) "
 				. "WHERE i.incident_active = 1 "
 				. "AND i.id <> ? ";
 
@@ -589,7 +588,7 @@ class Incident_Model extends ORM {
 		
 		foreach ($photos as $photo)
 		{
-			$this->_delete_photo($photo->id);
+			Media_Model::delete_photo($photo->id);
 		}
 
 		// Delete Media
@@ -617,6 +616,11 @@ class Incident_Model extends ORM {
 		ORM::factory('comment')
 			->where('incident_id', $this->id)
 			->delete_all();
+			
+		// Delete ratings
+		ORM::factory('rating')
+			->where('incident_id', $this->id)
+			->delete_all();
 
 		$incident_id = $this->id;
 
@@ -624,60 +628,6 @@ class Incident_Model extends ORM {
 		Event::run('ushahidi_action.report_delete', $incident_id);
 
 		parent::delete();
-	}
-
-	/**
-	 * Delete Photo
-	 * @param int $id The unique id of the photo to be deleted
-	 */
-	private function _delete_photo($id)
-	{
-		$photo = ORM::factory('media', $id);
-		$photo_large = $photo->media_link;
-		$photo_medium = $photo->media_medium;
-		$photo_thumb = $photo->media_thumb;
-
-		if (file_exists(Kohana::config('upload.directory', TRUE).$photo_large))
-		{
-			unlink(Kohana::config('upload.directory', TRUE).$photo_large);
-		}
-		elseif (Kohana::config("cdn.cdn_store_dynamic_content") AND valid::url($photo_large))
-		{
-			cdn::delete($photo_large);
-		}
-
-		if (file_exists(Kohana::config('upload.directory', TRUE).$photo_medium))
-		{
-			unlink(Kohana::config('upload.directory', TRUE).$photo_medium);
-		}
-		elseif (Kohana::config("cdn.cdn_store_dynamic_content") AND valid::url($photo_medium))
-		{
-			cdn::delete($photo_medium);
-		}
-
-		if (file_exists(Kohana::config('upload.directory', TRUE).$photo_thumb))
-		{
-			unlink(Kohana::config('upload.directory', TRUE).$photo_thumb);
-		}
-		elseif (Kohana::config("cdn.cdn_store_dynamic_content") AND valid::url($photo_thumb))
-		{
-			cdn::delete($photo_thumb);
-		}
-
-		// Finally Remove from DB
-		$photo->delete();
-	}
-
-	/**
-	 * Overrides the default save method for the ORM.
-	 * 
-	 */
-	public function save()
-	{
-		// Fire an event on every save
-		Event::run('ushahidi_action.report_save', $this);
-		
-		parent::save();
 	}
 
 }

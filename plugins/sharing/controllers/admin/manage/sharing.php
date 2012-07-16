@@ -23,7 +23,7 @@ class Sharing_Controller extends Admin_Controller
 		$this->template->this_page = 'settings';
 		
 		// If user doesn't have access, redirect to dashboard
-		if ( ! admin::permissions($this->user, "manage"))
+		if ( ! $this->auth->has_permission("manage"))
 		{
 			url::redirect(url::site().'admin/dashboard');
 		}
@@ -32,7 +32,7 @@ class Sharing_Controller extends Admin_Controller
 	
 	function index()
 	{
-		$this->template->content = new View('admin/sharing');
+		$this->template->content = new View('admin/manage/sharing/main');
 		$this->template->content->title = Kohana::lang('ui_admin.settings');
 		
 		// What to display
@@ -181,7 +181,7 @@ class Sharing_Controller extends Admin_Controller
 		
         // Javascript Header
 		$this->template->colorpicker_enabled = TRUE;
-		$this->template->js = new View('admin/sharing_js');
+		$this->template->js = new View('admin/manage/sharing/sharing_js');
 	}
 	
 	

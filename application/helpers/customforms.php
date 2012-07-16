@@ -51,7 +51,7 @@ class customforms_Core {
 		$ispublic_field = ($action == "view") ? 'field_ispublic_visible' : 'field_ispublic_submit';
 
 		// Query to fetch the form fields associated with the given form id
-		$sql = "SELECT ff.*, '' AS form_response FROM ".$table_prefix."form_field ff LEFT JOIN roles r ON (r.id = $ispublic_field) WHERE 1=1 ";
+		$sql = "SELECT ff.*, '' AS form_response FROM ".$table_prefix."form_field ff LEFT JOIN ".$table_prefix."roles r ON (r.id = $ispublic_field) WHERE 1=1 ";
 		
 		if ($form_id != null AND $form_id != '')
 		{
@@ -105,7 +105,7 @@ class customforms_Core {
 			$sql = "SELECT ff.*, fr.form_response "
 				. "FROM ".$table_prefix."form_field ff "
 				. "RIGHT JOIN ".$table_prefix."form_response fr ON (fr.form_field_id = ff.id) "
-				. "LEFT JOIN roles r ON (r.id = $ispublic_field)"
+				. "LEFT JOIN ".$table_prefix."roles r ON (r.id = $ispublic_field)"
 				. "WHERE fr.incident_id = ".$incident_id." ";
 
 			if ($form_id != null AND $form_id != '')
@@ -372,7 +372,7 @@ class customforms_Core {
 		$form = array();
 		$form['custom_field'] = self::get_custom_form_fields('',$form_id, true);
 		$form['id'] = $form_id;
-		$custom_forms = new View('reports_submit_custom_forms');
+		$custom_forms = new View('reports/submit_custom_forms');
 		$disp_custom_fields = self::get_custom_form_fields('', $form_id,false);
 		$custom_forms->disp_custom_fields = $disp_custom_fields;
 		$custom_forms->form = $form;
@@ -400,7 +400,7 @@ class customforms_Core {
 		$form = array();
 		$form['custom_field'] = self::get_custom_form_fields($incident_id,$form_id, TRUE);
 		$form['id'] = $form_id;
-		$custom_forms = new View('reports_submit_custom_forms');
+		$custom_forms = new View('reports/submit_custom_forms');
 		$disp_custom_fields = self::get_custom_form_fields($incident_id,$form_id, FALSE);
 		$custom_forms->disp_custom_fields = $disp_custom_fields;
 		$custom_forms->form = $form;

@@ -339,13 +339,7 @@ class Admin_Reports_Api_Object extends Incidents_Api_Object {
 					}
 
 					$update->save();
-					$verify = new Verify_Model();
-					$verify->incident_id = $incident_id;
-					$verify->verified_status = '0';
-					$verify->user_id = $_SESSION['auth_user']->id;
-					// Record 'Verified By' Action
-					$verify->verified_date = date("Y-m-d H:i:s", time());
-					$verify->save();
+					reports::verify_approve($update);
 
 				}
 				else
@@ -408,22 +402,14 @@ class Admin_Reports_Api_Object extends Incidents_Api_Object {
 					if ($update->incident_verified == '1')
 					{
 						$update->incident_verified = '0';
-						$verify->verified_status = '0';
 					}
 					else
 					{
 						$update->incident_verified = '1';
-						$verify->verified_status = '2';
 					}
 					$update->save();
 
-					$verify = new Verify_Model();
-					$verify->incident_id = $incident_id;
-					$verify->user_id = $_SESSION['auth_user']->id;
-					// Record 'Verified By' Action
-					$verify->verified_date = date("Y-m-d H:i:s", time());
-					$verify->save();
-
+					reports::verify_approve($update);
 				}
 				else
 				{
@@ -496,7 +482,7 @@ class Admin_Reports_Api_Object extends Incidents_Api_Object {
 			Event::run('ushahidi_action.report_submit_admin', $post);
 
 			// Test to see if things passed the rule checks
-			if (reports::validate($post, TRUE))
+			if (reports::validate($post))
 			{
 				// Yes! everything is valid
 				$location_id = $post->location_id;
@@ -511,8 +497,7 @@ class Admin_Reports_Api_Object extends Incidents_Api_Object {
 				reports::save_report($post, $incident, $location->id);
 
 				// STEP 2b: Record Approval/Verification Action
-				$verify = new Verify_Model();
-				reports::verify_approve($post, $verify, $incident);
+				reports::verify_approve($incident);
 
 				// STEP 2c: SAVE INCIDENT GEOMETRIES
 				reports::save_report_geometry($post, $incident);

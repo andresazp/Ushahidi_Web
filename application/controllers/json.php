@@ -14,19 +14,19 @@
  * @license	   http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License (LGPL)
  */
 
-class Json_Controller extends Template_Controller
-{
-	/**
-	 * Automatically render the views
-	 * @var bool
-	 */
-	public $auto_render = TRUE;
+class Json_Controller extends Template_Controller {
 
 	/**
-	 * Name of the view template for this controller
+	 * Disable automatic rendering
+	 * @var bool
+	 */
+	public $auto_render = FALSE;
+
+	/**
+	 * Template for this controller
 	 * @var string
 	 */
-	public $template = 'json';
+	public $template = '';
 
 	/**
 	 * Database table prefix
@@ -34,8 +34,12 @@ class Json_Controller extends Template_Controller
 	 */
 	protected $table_prefix;
 
-	// Geometry data
+	/**
+	 * Geometry data
+	 * @var array
+	 */
 	private static $geometry_data = array();
+
 
 	public function __construct()
 	{
@@ -86,7 +90,9 @@ class Json_Controller extends Template_Controller
 		}
 		
 		// Fetch the incidents
-		$markers = (isset($_GET['page']) AND intval($_GET['page']) > 0)? reports::fetch_incidents(TRUE) : reports::fetch_incidents();
+		$markers = (isset($_GET['page']) AND intval($_GET['page']) > 0)
+		    ? reports::fetch_incidents(TRUE)
+		    : reports::fetch_incidents();
 		
 		foreach ($markers as $marker)
 		{
@@ -110,7 +116,7 @@ class Json_Controller extends Template_Controller
 			}
 
 			$link = url::base()."reports/view/".$marker->incident_id;
-			$item_name = $this->_get_title($marker->incident_title, $link);
+			$item_name = $this->get_title($marker->incident_title, $link);
 
 			$json_item = array();
 			$json_item['type'] = 'Feature';
@@ -142,7 +148,7 @@ class Json_Controller extends Template_Controller
 			$geometry = $this->_get_geometry($marker->incident_id, $marker->incident_title, $marker->incident_date);
 			if (count($geometry))
 			{
-				foreach($geometry as $g)
+				foreach ($geometry as $g)
 				{
 					array_push($json_features, $g);
 				}
@@ -163,7 +169,7 @@ class Json_Controller extends Template_Controller
 		));
 
 		header('Content-type: application/json; charset=utf-8');
-		$this->template->json = $json;
+		echo $json;
 	}
 
 
@@ -276,7 +282,7 @@ class Json_Controller extends Template_Controller
 		foreach ($clusters as $cluster)
 		{
 			// Calculate cluster center
-			$bounds = $this->_calculateCenter($cluster);
+			$bounds = $this->calculate_center($cluster);
 			$cluster_center = array_values($bounds['center']);
 			$southwest = $bounds['sw']['longitude'].','.$bounds['sw']['latitude'];
 			$northeast = $bounds['ne']['longitude'].','.$bounds['ne']['latitude'];
@@ -291,7 +297,7 @@ class Json_Controller extends Template_Controller
 			
 			// Build out the JSON string
 			$link = url::base()."reports/index/?c=".$category_id."&sw=".$southwest."&ne=".$northeast.$time_filter;
-			$item_name = $this->_get_title($cluster_count . Kohana::lang('ui_main.cluster_name_reports'), $link);
+			$item_name = $this->get_title(Kohana::lang('ui_main.reports_count', $cluster_count), $link);
 			
 			$json_item = array();
 			$json_item['type'] = 'Feature';
@@ -316,7 +322,7 @@ class Json_Controller extends Template_Controller
 		foreach ($singles as $single)
 		{
 			$link = url::base()."reports/view/".$single['id'];
-			$item_name = $this->_get_title($single['incident_title'], $link);
+			$item_name = $this->get_title($single['incident_title'], $link);
 			
 			$json_item = array();
 			$json_item['type'] = 'Feature';
@@ -356,7 +362,7 @@ class Json_Controller extends Template_Controller
 		));
 		
 		header('Content-type: application/json; charset=utf-8');
-		$this->template->json = $json;
+		echo $json;
 	}
 
 	/**
@@ -395,7 +401,7 @@ class Json_Controller extends Template_Controller
 			foreach ($neighbours as $row)
 			{
 				$link = url::base()."reports/view/".$row->id;
-				$item_name = $this->_get_title($row->incident_title, $link);
+				$item_name = $this->get_title($row->incident_title, $link);
 				
 				$json_item = array();
 				$json_item['type'] = 'Feature';
@@ -422,7 +428,7 @@ class Json_Controller extends Template_Controller
 			{
 				// Single Main Incident
 				$link = url::base()."reports/view/".$marker->id;
-				$item_name = $this->_get_title($marker->incident_title, $link);
+				$item_name = $this->get_title($marker->incident_title, $link);
 	
 				$json_item = array();
 				$json_item['type'] = 'Feature';
@@ -457,21 +463,22 @@ class Json_Controller extends Template_Controller
 		));
 		
 		header('Content-type: application/json; charset=utf-8');
-		$this->template->json = $json;
+		echo $json;
 	}
 
 	/**
 	 * Retrieve timeline JSON
 	 */
-	public function timeline( $category_id = 0 )
+	public function timeline($category_id = 0)
 	{
 		$category_id = (int) $category_id;
 
 		$this->auto_render = FALSE;
 		$db = new Database();
 
-		$interval = (isset($_GET["i"]) AND !empty($_GET["i"])) ?
-			$_GET["i"] : "month";
+		$interval = (isset($_GET["i"]) AND ! empty($_GET["i"]))
+		    ? $_GET["i"]
+		    : "month";
 
 		// Get Category Info
 		if ($category_id > 0)
@@ -520,40 +527,96 @@ class Json_Controller extends Template_Controller
 
 		// Gather allowed ids if we are looking at a specific category
 
-		$allowed_ids = array();
-		if($category_id != 0)
-		{
-			$query = 'SELECT ic.incident_id AS incident_id FROM '.$this->table_prefix.'incident_category AS ic INNER JOIN '.$this->table_prefix.'category AS c ON (ic.category_id = c.id)  WHERE c.id='.$category_id.' OR c.parent_id='.$category_id.';';
-			$query = $db->query($query);
-
-			foreach ( $query as $items )
-			{
-				$allowed_ids[] = $items->incident_id;
-			}
-
-		}
-
-		// Add aditional filter here to only allow for incidents that are in the requested category
 		$incident_id_in = '';
-		if(count($allowed_ids) AND $category_id != 0)
+		if ($category_id != 0)
 		{
-			$incident_id_in = ' AND id IN ('.implode(',',$allowed_ids).')';
+			$query = 'SELECT ic.incident_id AS id '
+			    . 'FROM '.$this->table_prefix.'incident_category ic '
+			    . 'INNER JOIN '.$this->table_prefix.'category c ON (ic.category_id = c.id) '
+			    . 'WHERE (c.id='.$category_id.' OR c.parent_id='.$category_id.')';
+
+			$incident_id_in = $this->_exec_timeline_data_query($db, $query);
 		}
-		elseif(count($allowed_ids) == 0 AND $category_id != 0)
+
+		// If a category id was specified and no data was returned,
+		// skip application of the other filters
+		if ($category_id !== 0 AND empty($incident_id_in))
 		{
 			$incident_id_in = ' AND 3 = 4';
 		}
+		else
+		{
+			// Apply start and end date filters
+			if (isset($_GET['s']) AND isset($_GET['e']))
+			{
+				$query = 'SELECT id FROM '.$this->table_prefix.'incident '
+				    . 'WHERE incident_date >= "'.date("Y-m-d H:i:s", $_GET['s']).'" '
+				    . 'AND incident_date <= "'.date('Y-m-d H:i:s', $_GET['e']).'"'
+				    . $incident_id_in;
 
-		$query = 'SELECT UNIX_TIMESTAMP('.$select_date_text.') AS time, COUNT(id) AS number FROM '.$this->table_prefix.'incident WHERE incident_active = 1 '.$incident_id_in.' GROUP BY '.$groupby_date_text;
-		$query = $db->query($query);
+				$incident_id_in = $this->_exec_timeline_data_query($db, $query);
 
-		foreach ( $query as $items )
+				if (empty($incident_id_in))
+				{
+					$incident_id_in = ' AND 3 = 4';
+				}
+			}
+
+
+			// Apply media type filters
+			if (isset($_GET['m']) AND intval($_GET['m']) > 0)
+			{
+				$query = "SELECT incident_id AS id FROM ".$this->table_prefix."media "
+				    . "WHERE media_type = ".intval($_GET['m'])
+				    . $incident_id_in;
+
+				$incident_id_in = $this->_exec_timeline_data_query($db, $query);
+
+				if (empty($incident_id_in))
+				{
+					$incident_id_in = ' AND 3 = 4';
+				}
+			}
+		}
+
+		// Fetch the timeline data
+		$query = 'SELECT UNIX_TIMESTAMP('.$select_date_text.') AS time, COUNT(id) AS number '
+		    . 'FROM '.$this->table_prefix.'incident '
+		    . 'WHERE incident_active = 1 '.$incident_id_in.' '
+		    . 'GROUP BY '.$groupby_date_text;
+		
+		foreach ($db->query($query) as $items)
 		{
 			array_push($graph_data[0]['data'],
 				array($items->time * 1000, $items->number));
 		}
 
 		echo json_encode($graph_data);
+	}
+
+	/**
+	 * Given a query, generates an 'IN' clause to be used
+	 * in the final query that is used to fetch the timeline data
+	 *
+	 * @param Database $db Database instance to use for executing the query
+	 * @param string $query SQL query to be executed
+	 */
+	private function _exec_timeline_data_query($db, $query)
+	{
+		$incident_id_in = '';
+		$allowed_ids = array();
+
+		foreach ($db->query($query) as $incident)
+		{
+			$allowed_ids[] = $incident->id;
+		}
+
+		// Adjust the incident filter clause
+		$incident_id_in = (count($allowed_ids) > 0)
+		    ? ' AND id IN ('.implode(',', $allowed_ids).')'
+		    : '';
+
+	    return $incident_id_in;
 	}
 	
 
@@ -579,7 +642,9 @@ class Json_Controller extends Template_Controller
 			{
 				// Pull from a URL
 				$layer_link = $layer_url;
-			}else{
+			}
+			else
+			{
 				// Pull from an uploaded file
 				$layer_link = Kohana::config('upload.directory').'/'.$layer_file;
 			}
@@ -600,224 +665,6 @@ class Json_Controller extends Template_Controller
 			throw new Kohana_404_Exception();
 		}
 	}
-
-
-	/**
-	 * Read in new layer JSON from shared connection
-	 * @param int $sharing_id - ID of the new Share Layer
-	 */
-	public function share( $sharing_id = false )
-	{
-		$json = '';
-		$json_item = array();
-		$json_features = array();
-		$sharing_data = "";
-		$clustering = Kohana::config('settings.allow_clustering');
-		
-		if ($sharing_id)
-		{
-			// Get This Sharing ID Color
-			$sharing = ORM::factory('sharing')
-				->find($sharing_id);
-			
-			if( ! $sharing->loaded )
-				throw new Kohana_404_Exception();
-			
-			$sharing_url = $sharing->sharing_url;
-			$sharing_color = $sharing->sharing_color;
-			
-			if ($clustering)
-			{
-				// Database
-				$db = new Database();
-				
-				// Start Date
-				$start_date = (isset($_GET['s']) && !empty($_GET['s'])) ?
-					(int) $_GET['s'] : "0";
-
-				// End Date
-				$end_date = (isset($_GET['e']) && !empty($_GET['e'])) ?
-					(int) $_GET['e'] : "0";
-
-				// SouthWest Bound
-				$southwest = (isset($_GET['sw']) && !empty($_GET['sw'])) ?
-					$_GET['sw'] : "0";
-
-				$northeast = (isset($_GET['ne']) && !empty($_GET['ne'])) ?
-					$_GET['ne'] : "0";
-				
-				// Get Zoom Level
-				$zoomLevel = (isset($_GET['z']) && !empty($_GET['z'])) ?
-					(int) $_GET['z'] : 8;
-
-				//$distance = 60;
-				$distance = (10000000 >> $zoomLevel) / 100000;
-				
-				$filter = "";
-				$filter .= ($start_date) ? 
-					" AND incident_date >= '" . date("Y-m-d H:i:s", $start_date) . "'" : "";
-				$filter .= ($end_date) ? 
-					" AND incident_date <= '" . date("Y-m-d H:i:s", $end_date) . "'" : "";
-
-				if ($southwest && $northeast)
-				{
-					list($latitude_min, $longitude_min) = explode(',', $southwest);
-					list($latitude_max, $longitude_max) = explode(',', $northeast);
-
-					$filter .= " AND latitude >=".(float) $latitude_min.
-						" AND latitude <=".(float) $latitude_max;
-					$filter .= " AND longitude >=".(float) $longitude_min.
-						" AND longitude <=".(float) $longitude_max;
-				}
-				
-				$filter .= " AND sharing_id = ".(int)$sharing_id;
-
-				$query = $db->query("SELECT * FROM `".$this->table_prefix."sharing_incident` WHERE 1=1 $filter ORDER BY incident_id ASC "); 
-
-				$markers = $query->result_array(FALSE);
-
-				$clusters = array();	// Clustered
-				$singles = array();		// Non Clustered
-
-				// Loop until all markers have been compared
-				while (count($markers))
-				{
-					$marker	 = array_pop($markers);
-					$cluster = array();
-
-					// Compare marker against all remaining markers.
-					foreach ($markers as $key => $target)
-					{
-						// This function returns the distance between two markers, at a defined zoom level.
-						// $pixels = $this->_pixelDistance($marker['latitude'], $marker['longitude'], 
-						// $target['latitude'], $target['longitude'], $zoomLevel);
-
-						$pixels = abs($marker['longitude']-$target['longitude']) + 
-							abs($marker['latitude']-$target['latitude']);
-						// echo $pixels."<BR>";
-						// If two markers are closer than defined distance, remove compareMarker from array and add to cluster.
-						if ($pixels < $distance)
-						{
-							unset($markers[$key]);
-							$target['distance'] = $pixels;
-							$cluster[] = $target;
-						}
-					}
-
-					// If a marker was added to cluster, also add the marker we were comparing to.
-					if (count($cluster) > 0)
-					{
-						$cluster[] = $marker;
-						$clusters[] = $cluster;
-					}
-					else
-					{
-						$singles[] = $marker;
-					}
-				}
-
-				// Create Json
-				foreach ($clusters as $cluster)
-				{
-					// Calculate cluster center
-					$bounds = $this->_calculateCenter($cluster);
-					$cluster_center = array_values($bounds['center']);
-					$southwest = $bounds['sw']['longitude'].','.$bounds['sw']['latitude'];
-					$northeast = $bounds['ne']['longitude'].','.$bounds['ne']['latitude'];
-
-					// Number of Items in Cluster
-					$cluster_count = count($cluster);
-					
-					$link = "http://".$sharing_url."reports/index/?c=0&sw=".$southwest."&ne=".$northeast;
-					$item_name = $this->_get_title($cluster_count . Kohana::lang('ui_main.cluster_name_reports'), $link);
-					
-					$json_item = array();
-					$json_item['type'] = 'Feature';
-					$json_item['properties'] = array(
-						'name' => $item_name,
-						'link' => $link,
-						'category' => array(0),
-						'color' => $sharing_color,
-						'icon' => '',
-						'thumb' => '',
-						'timestamp' => 0,
-						'count' => $cluster_count,
-					);
-					$json_item['geometry'] = array(
-						'type' => 'Point',
-						'coordinates' => $cluster_center
-					);
-
-					array_push($json_features, $json_item);
-				}
-
-				foreach ($singles as $single)
-				{
-					$link = "http://".$sharing_url."reports/view/".$single['id'];
-					$item_name = $this->_get_title($single['incident_title'], $link);
-		
-					$json_item = array();
-					$json_item['type'] = 'Feature';
-					$json_item['properties'] = array(
-						'name' => $item_name,
-						'link' => $link,
-						'category' => array(0),
-						'color' => $sharing_color,
-						'icon' => '',
-						'timestamp' => 0,
-						'count' => 1
-					);
-					$json_item['geometry'] = array(
-						'type' => 'Point',
-						'coordinates' => array($single['longitude'],$single['latitude'])
-					);
-
-					array_push($json_features, $json_item);
-				}
-			}
-			else
-			{
-				// Retrieve all markers
-				$markers = ORM::factory('sharing_incident')
-										->where('sharing_id', $sharing_id)
-										->find_all();
-
-				foreach ($markers as $marker)
-				{
-					$link = "http://".$sharing_url."reports/view/".$marker->incident_id;
-					$item_name = $this->_get_title($marker->incident_title, $link);
-
-					$json_item = array();
-					$json_item['type'] = 'Feature';
-					$json_item['properties'] = array(
-						'id' => $marker->incident_id,
-						'name' => $item_name,
-						'link' => $link,
-						'color' => $sharing_color,
-						'icon' => '',
-						'timestamp' => strtotime($marker->incident_date)
-					);
-					$json_item['geometry'] = array(
-						'type' => 'Point',
-						'coordinates' => array($marker->longitude, $marker->latitude)
-					);
-
-					array_push($json_features, $json_item);
-				}
-			}
-
-			Event::run('ushahidi_filter.json_share_features', $json_features);
-
-			$json = json_encode(array(
-				"type" => "FeatureCollection",
-				"features" => $json_features
-			));
-		}
-		
-		header('Content-type: application/json; charset=utf-8');
-		$this->template->json = $json;
-	}
-
 
 	/**
 	 * Get Geometry JSON
@@ -841,7 +688,7 @@ class Json_Controller extends Template_Controller
 
 				$title = ($item->geometry_label) ? $item->geometry_label : $incident_title;
 				$link =  url::base()."reports/view/".$incident_id;
-				$item_name = $this->_get_title($title, $link);
+				$item_name = $this->get_title($title, $link);
 					
 				$fillcolor = ($item->geometry_color) ? 
 					utf8tohtml::convert($item->geometry_color,TRUE) : "ffcc66";
@@ -950,7 +797,7 @@ class Json_Controller extends Template_Controller
 	 * @param array $cluster
 	 * @return array - (center, southwest bound, northeast bound)
 	 */
-	private function _calculateCenter($cluster)
+	protected function calculate_center($cluster)
 	{
 		// Calculate average lat and lon of clustered items
 		$south = 90;
@@ -1004,7 +851,7 @@ class Json_Controller extends Template_Controller
 	 * @param string $url - URL to link to
 	 * @return string
 	 */
-	private function _get_title($title, $url)
+	protected function get_title($title, $url)
 	{
 		$encoded_title = utf8tohtml::convert($title, TRUE);
 		$encoded_title = str_ireplace('"','&#34;',$encoded_title);

@@ -81,116 +81,55 @@ class Themes_Core {
 	 */
 	private function _header_css()
 	{
-		$core_css_combine = array(); $core_css = "";
-		$core_css_combine[] = "media/css/jquery-ui-themeroller";
+		$core_css = "";
+		$core_css .= html::stylesheet($this->css_url."media/css/jquery-ui-themeroller", "", TRUE);
 
 		foreach (Kohana::config("settings.site_style_css") as $theme_css)
 		{
-			$core_css_combine[] = $theme_css;
+			$core_css .= html::stylesheet($theme_css,"",TRUE);
 		}
 
-		$core_css .= "<!--[if lte IE 7]>".html::stylesheet($this->css_url."media/css/iehacks","",true)."<![endif]-->";
-		$core_css .= "<!--[if IE 7]>".html::stylesheet($this->css_url."media/css/ie7hacks","",true)."<![endif]-->";
-		$core_css .= "<!--[if IE 6]>".html::stylesheet($this->css_url."media/css/ie6hacks","",true)."<![endif]-->";
+		$core_css .= "<!--[if lte IE 7]>".html::stylesheet($this->css_url."media/css/iehacks","",TRUE)."<![endif]-->";
+		$core_css .= "<!--[if IE 7]>".html::stylesheet($this->css_url."media/css/ie7hacks","",TRUE)."<![endif]-->";
+		$core_css .= "<!--[if IE 6]>".html::stylesheet($this->css_url."media/css/ie6hacks","",TRUE)."<![endif]-->";
 
-		if ($this->map_enabled || Kohana::config('config.combine_css'))
+		if ($this->map_enabled)
 		{
-			$core_css_combine[] = "media/css/openlayers";
+			$core_css .= html::stylesheet($this->css_url."media/css/openlayers","",TRUE);
 		}
 
-		if ($this->treeview_enabled || Kohana::config('config.combine_css'))
+		if ($this->treeview_enabled)
 		{
-			$core_css_combine[] = "media/css/jquery.treeview";
+			$core_css .= html::stylesheet($this->css_url."media/css/jquery.treeview","",TRUE);
 		}
 
 		if ($this->photoslider_enabled)
 		{
-			$core_css .= html::stylesheet($this->css_url."media/css/picbox/picbox","",true);
+			$core_css .= html::stylesheet($this->css_url."media/css/picbox/picbox","",TRUE);
 		}
 
 		if ($this->videoslider_enabled)
 		{
-			$core_css .= html::stylesheet($this->css_url."media/css/videoslider","",true);
+			$core_css .= html::stylesheet($this->css_url."media/css/videoslider","",TRUE);
 		}
 
-		if ($this->colorpicker_enabled || Kohana::config('config.combine_css'))
+		if ($this->colorpicker_enabled)
 		{
-			$core_css_combine[] = "media/css/colorpicker";
+			$core_css .= html::stylesheet($this->css_url."media/css/colorpicker","",TRUE);
 		}
 
-		$core_css_combine[] = "media/css/global";
+		if ($this->site_style AND $this->site_style != "default")
+		{
+			$core_css .= html::stylesheet($this->css_url."themes/".$site_style."/style.css");
+		}
 
-		Event::run('ushahidi_filter.header_core_css', $core_css_combine);
-		
+		$core_css .= html::stylesheet($this->css_url."media/css/global","",TRUE);
+		$core_css .= html::stylesheet($this->css_url."media/css/jquery.jqplot.min", "", TRUE);
+
 		// Render CSS
 		$plugin_css = plugin::render('stylesheet');
 
-		if (Kohana::config('config.combine_css'))
-		{
-			$core_css = html::stylesheet($this->_combine_media($core_css_combine, 'css'),"",FALSE).$core_css;
-		}
-		else
-		{
-			foreach ($core_css_combine as $file) {
-				$core_css .= html::stylesheet($this->css_url.$file,"",true);
-			}
-		}
-		
 		return $core_css.$plugin_css;
-	}
-
-	/*
-	 * Combine and compress an array of css/js files
-	 * @param Array - file names
-	 * @param string - file type (css/js)
-	 * @return string - url for combined file
-	 **/
-	private function _combine_media($files, $type) {
-		// Check for already compressed/combined file
-		$key = hash('sha256', serialize($files));
-		$filename = $this->cache->get($type.'_'.$key);
-		
-		$file_path = Kohana::config('upload.directory', TRUE);
-		// Make sure the directory ends with a slash
-		$file_path = rtrim($file_path, '/')."/$type/";
-		
-		
-		if ( empty($filename) || ! file_exists($file_path.$filename))
-		{
-			$combined = "";
-			$minify = new Minify($type);
-			foreach($files as $file) {
-				$compressed_file = $minify->compress($file,True);
-				// Rewrite CSS url paths
-				if ($type == 'css')
-				{
-					$path0 = str_replace(DOCROOT,'',realpath(dirname($file).'/../../').'/');
-					$path1 = str_replace(DOCROOT,'',realpath(dirname($file).'/../').'/');
-
-					$compressed_file = preg_replace('#url\([\'"]?(..\/..\/(.*))[\'"]?\)#iU','url("'.url::base().$path0.'$2")',$compressed_file);
-					$compressed_file = preg_replace('#url\([\'"]?(..\/(.*))[\'"]?\)#iU','url("'.url::base().$path1.'$2")',$compressed_file);
-				}
-				$combined .= $compressed_file;
-			}
-			
-			// Generate filename
-			$hash = base64_encode(hash('sha256', $combined, TRUE));
-			// Modify the hash so it's safe to use in URLs.
-			$filename = $type.'_'. strtr($hash, array('+' => '-', '/' => '_', '=' => '')).".$type";
-			
-			if ( ! is_dir($file_path))
-			{
-				// Create the upload directory
-				mkdir($file_path, 0777, TRUE);
-			}
-			// Output combined file
-			file_put_contents($file_path.$filename, $combined);
-			$this->cache->set($type.'_'.$key, $filename);
-		}
-		
-		$base_url = url::base().Kohana::config('upload.relative_directory')."/$type/";
-		
-		return $base_url.$filename;
 	}
 
 	/**
@@ -199,44 +138,66 @@ class Themes_Core {
 	private function _header_js()
 	{
 		$core_js = "";
-		$core_js_combine = array();
 		if ($this->map_enabled)
 		{
-			$core_js .= html::script($this->js_url."media/js/OpenLayers", true);
+			$core_js .= html::script($this->js_url."media/js/OpenLayers", TRUE);
 			$core_js .= "<script type=\"text/javascript\">OpenLayers.ImgPath = '".$this->js_url."media/img/openlayers/"."';</script>";
+			$core_js .= html::script($this->js_url."media/js/ushahidi", TRUE);
 		}
 
-		$core_js_combine[] = "media/js/jquery";
-		$core_js_combine[] = "media/js/jquery-ui-1.8.19.custom.min";
-		//$core_js .= html::script("https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/jquery-ui.min.js", true);
-		$core_js_combine[] = "media/js/jquery.pngFix.pack";
-		$core_js_combine[] = "media/js/jquery.timeago";
+		$core_js .= html::script($this->js_url."media/js/jquery", TRUE);
+		//$core_js .= html::script($this->js_url."media/js/jquery.ui.min", TRUE);
+		$core_js .= html::script("https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/jquery-ui.min.js", TRUE);
+		$core_js .= html::script($this->js_url."media/js/jquery.pngFix.pack", TRUE);
+		$core_js .= html::script($this->js_url."media/js/jquery.timeago", TRUE);
 
-		if ($this->map_enabled || Kohana::config('config.combine_js'))
+		if ($this->map_enabled)
 		{
 
 			$core_js .= $this->api_url;
 
-			if ($this->main_page || Kohana::config('config.combine_js'))
+			if ($this->main_page || $this->this_page == "alerts")
 			{
-				$core_js_combine[] = "media/js/jquery.flot";
-				$core_js_combine[] = "media/js/timeline";
-				$core_js .= "<!--[if IE]>".html::script($this->js_url."media/js/excanvas.min", true)."<![endif]-->";
+				$core_js .= html::script($this->js_url."media/js/selectToUISlider.jQuery", TRUE);
+			}
+
+			if ($this->main_page)
+			{
+				// Notes: E.Kala <emmanuel(at)ushahidi.com>
+				// TODO: Only include the jqplot JS when the timeline is enabled
+				$core_js .= html::script($this->js_url."media/js/jquery.jqplot.min");
+				$core_js .= html::script($this->js_url."media/js/jqplot.dateAxisRenderer.min");
+
+				$core_js .= "<!--[if IE]>".html::script($this->js_url."media/js/excanvas.min", TRUE)."<![endif]-->";
 			}
 		}
 
-		if ($this->treeview_enabled || Kohana::config('config.combine_js'))
+		if ($this->treeview_enabled)
 		{
-			$core_js_combine[] = "media/js/jquery.treeview";
+			$core_js .= html::script($this->js_url."media/js/jquery.treeview");
 		}
 
+		if ($this->validator_enabled)
+		{
+			$core_js .= html::script($this->js_url."media/js/jquery.validate.min");
+		}
+
+		if ($this->photoslider_enabled)
+		{
+			$core_js .= html::script($this->js_url."media/js/picbox", TRUE);
+		}
+
+		if ($this->videoslider_enabled)
+		{
+			$core_js .= html::script($this->js_url."media/js/coda-slider.pack");
+		}
 
 		if ($this->colorpicker_enabled)
 		{
-			$core_js_combine[] = "media/js/colorpicker";
+			$core_js .= html::script($this->js_url."media/js/colorpicker");
 		}
 
-		$core_js_combine[] = "media/js/global";
+		$core_js .= html::script($this->js_url."media/js/global");
 
 		if ($this->editor_enabled)
 		{
@@ -249,53 +210,19 @@ class Themes_Core {
 		// Javascript files from themes
 		foreach (Kohana::config("settings.site_style_js") as $theme_js)
 		{
-			$core_js_combine[] = $theme_js;
+			$core_js .= html::script($theme_js,"",TRUE);
 		}
-		
-		Event::run('ushahidi_filter.header_core_js', $core_js_combine);
-		
-		$inline_js_content = /*"function runScheduler(img){img.onload = null;img.src = '".url::site()."scheduler';}"
-			.'$(document).ready(function(){$(document).pngFix();});'
-			.*/$this->js;
 
-		$inline_js = "<script type=\"text/javascript\"><!--//";
-		$inline_js .= Kohana::config('config.compress_inline_js') ? Minify_Js_Driver::minify($inline_js_content) : $inline_js_content;
-		$inline_js .= "\n//--></script>";
+		// Inline Javascript
+		$inline_js = "<script type=\"text/javascript\">
+                        <!--//
+function runScheduler(img){img.onload = null;img.src = '".url::site().'scheduler'."';}
+			".'$(document).ready(function(){$(document).pngFix();});'.$this->js.
+                        "//-->
+                        </script>";
 
 		// Filter::header_js - Modify Header Javascript
 		Event::run('ushahidi_filter.header_js', $inline_js);
-		
-		if (Kohana::config('config.combine_js'))
-		{
-			$core_js .= html::script($this->_combine_media($core_js_combine, 'js'),"",FALSE);
-		}
-		else
-		{
-			foreach ($core_js_combine as $file) {
-				$core_js .= html::script($this->js_url.$file,"",true);
-			}
-		}
-		
-		// Other js files that need to come after jquery
-		if ($this->validator_enabled)
-		{
-			$core_js .= html::script($this->js_url."media/js/jquery.validate.min");
-		}
-
-		if ($this->photoslider_enabled)
-		{
-			$core_js .= html::script($this->js_url."media/js/picbox", true);
-		}
-
-		if($this->videoslider_enabled )
-		{
-			$core_js .= html::script($this->js_url."media/js/coda-slider.pack");
-		}
-		
-		if ($this->map_enabled && ($this->main_page || $this->this_page == "alerts") )
-		{
-			$core_js .= html::script($this->js_url."media/js/selectToUISlider.jQuery", true);
-		}
 
 		return $core_js.$plugin_js.$inline_js;
 	}
@@ -337,26 +264,7 @@ class Themes_Core {
 		// *** Locales/Languages ***
 		// First Get Available Locales
 
-		$locales = $this->cache->get('locales');
-
-		// If we didn't find any languages, we need to look them up and set the cache
-		if( ! $locales)
-		{
-			$locales = ush_locale::get_i18n();
-			$this->cache->set('locales', $locales, array('locales'), 604800);
-		}
-
-		// Locale form submitted?
-		if (isset($_GET['l']) && !empty($_GET['l']))
-		{
-			$this->session->set('locale', $_GET['l']);
-		}
-		// Has a locale session been set?
-		if ($this->session->get('locale',FALSE))
-		{
-			// Change current locale
-			Kohana::config_set('locale.language', $_SESSION['locale']);
-		}
+		$locales = ush_locale::get_i18n();
 
 		$languages = "";
 		$languages .= "<div class=\"language-box\">";
@@ -440,7 +348,7 @@ class Themes_Core {
 			_gaq.push(['_trackPageview']);
 
 			(function() {
-			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = TRUE;
 			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
 			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 			})();

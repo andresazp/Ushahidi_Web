@@ -57,7 +57,7 @@ class category_Core {
 	/**
 	 * Display category tree with input checkboxes.
 	 */
-	public static function tree($categories,$hide_children = TRUE, array $selected_categories, $form_field, $columns = 1, $enable_parents = FALSE)
+	public static function tree($categories, $hide_children = TRUE, array $selected_categories, $form_field, $columns = 1, $enable_parents = FALSE)
 	{
 		$html = '';
 
@@ -71,8 +71,12 @@ class category_Core {
 		$categories_total = $categories->count();
 
 		// Format categories for column display.
-		$this_col = 1; // column number
-		$maxper_col = round($categories_total/$columns); // Maximum number of elements per column
+		// Column number
+		$this_col = 1;
+
+		// Maximum number of elements per column
+		$maxper_col = round($categories_total/$columns);
+
 		$i = 1;  // Element Count
 		foreach ($categories as $category)
 		{
@@ -92,7 +96,7 @@ class category_Core {
 			foreach ($category->children as $child)
 			{
 				// If we don't want to show a category's hidden children
-				if($hide_children == TRUE)
+				if ($hide_children == TRUE)
 				{
 					$child_visible = $child->category_visible;
 					if ($child_visible)
@@ -129,14 +133,17 @@ class category_Core {
 				}
 				$html .= '</ul>';
 			}
-			$i++;
 
 			// If this is the last element of a column, close the UL
-			if ($i > $maxper_col || $i == $categories_total)
+			if ($i > $maxper_col OR $i == $categories_total)
 			{
 				$html .= '</ul>';
 				$i = 1;
 				$this_col++;
+			}
+			else
+			{
+				$i++;
 			}
 		}
 
@@ -159,64 +166,50 @@ class category_Core {
 		// Database instance
 		$db = new Database();
 		
-		// Fetch all the top level parent categories
-		foreach (Category_Model::get_categories(0,FALSE,TRUE) as $category)
-		{
-			self::_extend_category_data($category_data, $category);
-		}
-		
-		// NOTES: Emmanuel Kala - Aug 5, 2011
-		// Initialize the report totals for the parent categories just in case
-		// the deployment does not have sub-categories in which case the query
-		// below won't return a result
-		self::_init_parent_category_report_totals($category_data, $table_prefix);
-		
-		// Query to fetch the report totals for the parent categories
-		$sql = "SELECT c_parent.id,  COUNT(DISTINCT ic.incident_id)  AS report_count "
-			. "FROM ".$table_prefix."category c "
-			. "INNER JOIN ".$table_prefix."category c_parent ON (c.parent_id = c_parent.id) "
-			. "INNER JOIN ".$table_prefix."incident_category ic ON (ic.category_id = c.id OR ic.category_id = c_parent.id) "
-			. "INNER JOIN ".$table_prefix."incident i ON (ic.incident_id = i.id) "
-			. "WHERE i.incident_active = 1 "
-			. "AND c_parent.category_visible = 1 "
-			. "AND c.category_visible = 1 "
-			. "AND c_parent.parent_id = 0 "
-			. "AND c_parent.category_title != \"NONE\""
-			. "GROUP BY c_parent.id "
-			. "ORDER BY c_parent.id ASC";
-		
-		// Update the report_count field of each top-level category
-		foreach ($db->query($sql) as $category_total)
-		{
-			// Check if the category exists
-			if (array_key_exists($category_total->id, $category_data))
-			{
-				// Update
-				$category_data[$category_total->id]['report_count'] = $category_total->report_count;
-			}
-		}
-		
 		// Fetch the other categories
 		$sql = "SELECT c.id, c.parent_id, c.category_title, c.category_color, c.category_image, c.category_image_thumb, COUNT(i.id) report_count "
 			. "FROM ".$table_prefix."category c "
+			. "LEFT JOIN ".$table_prefix."category c_parent ON (c.parent_id = c_parent.id) "
 			. "LEFT JOIN ".$table_prefix."incident_category ic ON (ic.category_id = c.id) "
 			. "LEFT JOIN ".$table_prefix."incident i ON (ic.incident_id = i.id AND i.incident_active = 1 ) "
 			. "WHERE c.category_visible = 1 "
+			. "AND (c_parent.category_visible = 1 OR c.parent_id = 0)" // Parent must be visible, or must be top level
 			. "AND c.category_title != \"NONE\" "
 			. "GROUP BY c.id "
 			. "ORDER BY c.category_title ASC";
 		
-		// Add child categories
+		// Create nested array - all in one pass
 		foreach ($db->query($sql) as $category)
 		{
-			// Extend the category data array
-			self::_extend_category_data($category_data, $category);
-			
-			if (array_key_exists($category->parent_id, $category_data))
+			// If this is a parent category, just add it to the array
+			if ($category->parent_id == 0)
 			{
+				// save children and report_count if already been created.
+				$children = isset($category_data[$category->id]['children']) ? $category_data[$category->id]['children'] : array();
+				$report_count = isset($category_data[$category->id]['report_count']) ? $category_data[$category->id]['report_count'] : 0;
+				
+				$category_data[$category->id] = array(
+					'category_title' => Category_Lang_Model::category_title($category->id, Kohana::config('locale.language.0')),
+					'parent_id' => $category->parent_id,
+					'category_color' => $category->category_color,
+					'category_image' => $category->category_image,
+					'category_image_thumb' => $category->category_image_thumb,
+					'report_count' => $category->report_count + $report_count,
+					'children' => $children
+				);
+			}
+			// If this is a child, add it underneath its parent category
+			else
+			{
+				// If we haven't processed the parent yet, add placeholder parent category
+				if (! array_key_exists($category->parent_id, $category_data))
+				{
+					$category_data[$category->parent_id] = array('children' => array(), 'report_count' => 0);
+				}
+				
 				// Add children
 				$category_data[$category->parent_id]['children'][$category->id] = array(
-					'category_title' => Category_Lang_Model::category_title($category->id,Kohana::config('locale.language.0')),
+					'category_title' => Category_Lang_Model::category_title($category->id, Kohana::config('locale.language.0')),
 					'parent_id' => $category->parent_id,
 					'category_color' => $category->category_color,
 					'category_image' => $category->category_image,
@@ -224,47 +217,13 @@ class category_Core {
 					'report_count' => $category->report_count,
 					'children' => array()
 				);
+				// Add to parent report count too
+				$category_data[$category->parent_id]['report_count'] += $category->report_count;
 			}
 		}
 		
 		// Generate and return the HTML
 		return self::_generate_treeview_html($category_data);
-	}
-	
-	/**
-	 * Helper method for adding parent categories to the category data
-	 *
-	 * @param array $array Pointer to the array containing the category data
-	 * @param mixed $category Object Category object to be added tot he array
-	 */
-	private static function _extend_category_data(array & $array, $category)
-	{
-		// Check if the category is a top-level parent category
-		$temp_category = ($category->parent_id == 0) ? $category : ORM::factory('category', $category->parent_id);
-
-		if ($temp_category instanceof Category_Model AND ! $temp_category->loaded)
-			return FALSE;
-
-		// Extend the array
-		if ( ! array_key_exists($temp_category->id, $array))
-		{
-			// Get the report count
-			$report_count = property_exists($temp_category, 'report_count')? $temp_category->report_count : 0;
-			
-			$array[$temp_category->id] = array(
-				'category_title' => Category_Lang_Model::category_title($temp_category->id,Kohana::config('locale.language.0')),
-				'parent_id' => $temp_category->parent_id,
-				'category_color' => $temp_category->category_color,
-				'category_image_thumb' => $temp_category->category_image_thumb,
-				'category_image' => $temp_category->category_image,
-				'report_count' => $report_count,
-				'children' => array()
-			);
-
-			return TRUE;
-		}
-
-		return FALSE;
 	}
 	
 	/**
@@ -297,39 +256,5 @@ class category_Core {
 		
 		// Return
 		return $tree_html;
-	}
-	
-	/**
-	 * Initializes the report totals for the parent categories
-	 *
-	 * @param array $category_data Array of the parent categories
-	 * @param string $table_prefix Database table prefix
-	 */
-	private static function _init_parent_category_report_totals(array & $category_data, $table_prefix)
-	{
-		// Query to fetch the report totals for the parent categories
-		$sql = "SELECT c.id, COUNT(DISTINCT ic.incident_id) AS report_count "
-			. "FROM ".$table_prefix."category c "
-			. "INNER JOIN ".$table_prefix."incident_category ic ON (ic.category_id = c.id) "
-			. "INNER JOIN ".$table_prefix."incident i ON (ic.incident_id = i.id) "
-			. "WHERE c.category_visible = 1 "
-			. "AND i.incident_active = 1 "
-			. "AND c.parent_id = 0 "
-			. "GROUP BY c.id";
-		
-		// Fetch the records
-		$result = Database::instance()->query($sql);
-		
-		// Set the report totals for each of the parent categorie
-		foreach ($result as $category)
-		{
-			if (array_key_exists($category->id, $category_data))
-			{
-				$category_data[$category->id]['report_count'] = $category->report_count;
-			}
-		}
-		
-		// Garbage collection
-		unset ($sql, $result);
 	}
 }

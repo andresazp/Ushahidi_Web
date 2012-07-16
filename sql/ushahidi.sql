@@ -1,5 +1,5 @@
 -- Ushahidi Engine
--- version 89
+-- version 92
 -- http://www.ushahidi.com
 
 
@@ -196,12 +196,12 @@ CREATE TABLE IF NOT EXISTS `category` (
 -- Dumping data for table `category`
 --
 
-INSERT INTO `category` (`id`,`category_title`, `category_description`, `category_color`, `category_visible`, `category_trusted`) VALUES
-(1, 'Category 1', 'Category 1', '9900CC', 1, 0),
-(2, 'Category 2', 'Category 2', '3300FF', 1, 0),
-(3, 'Category 3', 'Category 3', '663300', 1, 0),
-(4, 'Trusted Reports', 'Reports from trusted reporters', '339900', 1, 1),
-(5, 'NONE', 'Holds uncategorized reports', '009887', 1, 1);
+INSERT INTO `category` (`id`,`category_title`, `category_description`, `category_color`, `category_visible`, `category_trusted`, `category_position`) VALUES
+(1, 'Category 1', 'Category 1', '9900CC', 1, 0, 0),
+(2, 'Category 2', 'Category 2', '3300FF', 1, 0, 1),
+(3, 'Category 3', 'Category 3', '663300', 1, 0, 2),
+(4, 'Trusted Reports', 'Reports from trusted reporters', '339900', 1, 1, 3),
+(5, 'NONE', 'Holds uncategorized reports', '009887', 1, 1, 4);
 
 -- --------------------------------------------------------
 
@@ -1044,6 +1044,62 @@ CREATE TABLE IF NOT EXISTS `page` (
 -- --------------------------------------------------------
 
 /**
+ * Table structure for table `permissions`
+ *
+ */
+CREATE TABLE IF NOT EXISTS `permissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(32) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name_UNIQUE` (`name`)
+) ENGINE=MyISAM AUTO_INCREMENT=16 COMMENT='Stores permissions used for access control';
+
+/* Data for permissions table */
+INSERT IGNORE INTO `permissions` VALUES 
+(1,'reports_view'),
+(2,'reports_edit'),
+(4,'reports_comments'),
+(5,'reports_download'),
+(6,'reports_upload'),
+(7,'messages'),
+(8,'messages_reporters'),
+(9,'stats'),
+(10,'settings'),
+(11,'manage'),
+(12,'users'),
+(13,'manage_roles'),
+(14,'checkin'),
+(15,'checkin_admin'),
+(16,'reports_verify'),
+(17,'reports_approve'),
+(18,'admin_ui'),
+(19,'member_ui');
+
+-- --------------------------------------------------------
+
+/**
+ * Table structure for table `permissions_roles`
+ *
+ */
+CREATE TABLE IF NOT EXISTS `permissions_roles` (
+  `role_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  PRIMARY KEY (`role_id`,`permission_id`)
+) ENGINE=MyISAM COMMENT='Stores permissions assigned to roles';
+
+--
+-- Dumping data for table `permissions_roles`
+--
+
+INSERT INTO `permissions_roles` VALUES
+(1,14),
+(2,1),(2,2),(2,4),(2,5),(2,6),(2,7),(2,8),(2,9),(2,10),(2,11),(2,12),(2,14),(2,15),(2,16),(2,17),(2,18),
+(3,1),(3,2),(3,4),(3,5),(3,6),(3,7),(3,8),(3,9),(3,10),(3,11),(3,12),(3,13),(3,14),(3,15),(3,16),(3,17),(3,18),
+(4,19);
+
+-- ---------------------------------------------------------
+
+/**
  * Table structure for table `plugin`
  *
  */
@@ -1139,21 +1195,6 @@ CREATE TABLE IF NOT EXISTS `roles` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(32) NOT NULL,
   `description` varchar(255) NOT NULL,
-  `reports_view` tinyint(4) NOT NULL DEFAULT '0',
-  `reports_edit` tinyint(4) NOT NULL DEFAULT '0',
-  `reports_evaluation` tinyint(4) NOT NULL DEFAULT '0',
-  `reports_comments` tinyint(4) NOT NULL DEFAULT '0',
-  `reports_download` tinyint(4) NOT NULL DEFAULT '0',
-  `reports_upload` tinyint(4) NOT NULL DEFAULT '0',
-  `messages` tinyint(4) NOT NULL DEFAULT '0',
-  `messages_reporters` tinyint(4) NOT NULL DEFAULT '0',
-  `stats` tinyint(4) NOT NULL DEFAULT '0',
-  `settings` tinyint(4) NOT NULL DEFAULT '0',
-  `manage` tinyint(4) NOT NULL DEFAULT '0',
-  `users` tinyint(4) NOT NULL DEFAULT '0',
-  `manage_roles` tinyint(4) NOT NULL DEFAULT '0',
-  `checkin` tinyint(4) NOT NULL DEFAULT '1',
-  `checkin_admin` tinyint(4) NOT NULL DEFAULT '0',
   `access_level` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_name` (`name`)
@@ -1163,11 +1204,11 @@ CREATE TABLE IF NOT EXISTS `roles` (
 -- Dumping data for table `roles`
 --
 
-INSERT INTO `roles` (`id`, `name`, `description`, `reports_view`, `reports_edit`, `reports_evaluation`, `reports_comments`, `reports_download`, `reports_upload`, `messages`, `messages_reporters`, `stats`, `settings`, `manage`, `users`, `manage_roles`, `checkin`, `checkin_admin`, `access_level`) VALUES
-(1, 'login', 'Login privileges, granted after account confirmation', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0),
-(2, 'admin', 'Administrative user, has access to almost everything.', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 90),
-(3, 'superadmin', 'Super administrative user, has access to everything.', 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 100),
-(4, 'member', 'Regular user with access only to the member area', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10);
+INSERT INTO `roles` (`id`, `name`, `description`, `access_level`) VALUES
+(1, 'login', 'Login privileges, granted after account confirmation', 0),
+(2, 'admin', 'Administrative user, has access to almost everything.', 90),
+(3, 'superadmin', 'Super administrative user, has access to everything.', 100),
+(4, 'member', 'Regular user with access only to the member area', 10);
 
 -- --------------------------------------------------------
 
@@ -1284,80 +1325,82 @@ CREATE TABLE IF NOT EXISTS `sessions` (
  * Table structure for table `settings`
  *
  */
-
 CREATE TABLE IF NOT EXISTS `settings` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `site_name` varchar(255) DEFAULT NULL,
-  `site_tagline` varchar(255) DEFAULT NULL,
-  `site_banner_id` int(11) DEFAULT NULL,
-  `site_email` varchar(120) DEFAULT NULL,
-  `site_key` varchar(100) DEFAULT NULL,
-  `site_language` varchar(10) NOT NULL DEFAULT 'en_US',
-  `site_style` varchar(50) NOT NULL DEFAULT 'default',
-  `site_timezone` varchar(80) DEFAULT NULL,
-  `site_contact_page` tinyint(4) NOT NULL DEFAULT '1',
-  `site_help_page` tinyint(4) NOT NULL DEFAULT '1',
-  `site_message` text NOT NULL,
-  `site_copyright_statement` text,
-  `site_submit_report_message` text NOT NULL,
-  `allow_reports` tinyint(4) NOT NULL DEFAULT '1',
-  `allow_comments` tinyint(4) NOT NULL DEFAULT '1',
-  `allow_feed` tinyint(4) NOT NULL DEFAULT '1',
-  `allow_stat_sharing` tinyint(4) NOT NULL DEFAULT '1',
-  `allow_clustering` tinyint(4) NOT NULL DEFAULT '0',
-  `cache_pages` tinyint(4) NOT NULL DEFAULT '0',
-  `cache_pages_lifetime` int(4) NOT NULL DEFAULT '1800',
-  `private_deployment` tinyint(4) NOT NULL DEFAULT '0',
-  `default_map` varchar(100) NOT NULL DEFAULT 'osm_mapnik',
-  `default_map_all` varchar(20) NOT NULL DEFAULT 'CC0000',
-  `default_map_all_icon_id` int(11) DEFAULT NULL,
-  `api_google` varchar(200) DEFAULT NULL,
-  `api_live` varchar(200) DEFAULT NULL,
-  `api_akismet` varchar(200) DEFAULT NULL,
-  `default_country` int(11) DEFAULT NULL,
-  `multi_country` tinyint(4) NOT NULL DEFAULT '0',
-  `default_city` varchar(150) DEFAULT NULL,
-  `default_lat` varchar(100) DEFAULT NULL,
-  `default_lon` varchar(100) DEFAULT NULL,
-  `default_zoom` tinyint(4) NOT NULL DEFAULT '10',
-  `items_per_page` smallint(6) NOT NULL DEFAULT '5',
-  `items_per_page_admin` smallint(6) NOT NULL DEFAULT '20',
-  `sms_provider` varchar(100) DEFAULT NULL,
-  `sms_no1` varchar(100) DEFAULT NULL,
-  `sms_no2` varchar(100) DEFAULT NULL,
-  `sms_no3` varchar(100) DEFAULT NULL,
-  `google_analytics` text,
-  `twitter_hashtags` text,
-  `blocks` text,
-  `blocks_per_row` tinyint(4) NOT NULL DEFAULT '2',
-  `date_modify` datetime DEFAULT NULL,
-  `stat_id` bigint(20) DEFAULT NULL COMMENT 'comes from centralized stats',
-  `stat_key` varchar(30) NOT NULL,
-  `email_username` varchar(100) NOT NULL,
-  `email_password` varchar(100) NOT NULL,
-  `email_port` int(11) NOT NULL,
-  `email_host` varchar(100) NOT NULL,
-  `email_servertype` varchar(100) NOT NULL,
-  `email_ssl` int(5) NOT NULL,
-  `ftp_server` varchar(100) DEFAULT NULL,
-  `ftp_user_name` varchar(100) DEFAULT NULL,
-  `alerts_email` varchar(120) NOT NULL,
-  `checkins` tinyint(4) NOT NULL DEFAULT '0',
-  `facebook_appid` varchar(150) DEFAULT NULL,
-  `facebook_appsecret` varchar(150) DEFAULT NULL,
-  `allow_alerts` tinyint(4) NOT NULL DEFAULT '0',
-  `manually_approve_users` tinyint(4) NOT NULL DEFAULT '0',
-  `require_email_confirmation` tinyint(4) NOT NULL DEFAULT '0',
-  `db_version` varchar(20) DEFAULT NULL,
-  `ushahidi_version` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='Stores a deployment’s general settings' AUTO_INCREMENT=2 ;
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(100) NOT NULL DEFAULT '' COMMENT 'Unique identifier for the configuration parameter',
+  `value` text COMMENT 'Value for the settings parameter',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_settings_key` (`key`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
---
--- Dumping data for table `settings`
---
-INSERT INTO `settings` (`id`, `site_name`, `api_google`, `api_live`, `default_country`, `default_city`, `default_lat`, `default_lon`, `default_zoom`, `items_per_page`, `items_per_page_admin`, `blocks`, `date_modify`) VALUES
-(1, 'Ushahidi', 'ABQIAAAAjsEM5UsvCPCIHp80spK1kBQKW7L4j6gYznY0oMkScAbKwifzxxRhJ3SP_ijydkmJpN3jX8kn5r5fEQ', 'Apumcka0uPOF2lKLorq8aeo4nuqfVVeNRqJjqOcLMJ9iMCTsnMsNd9_OvpA8gR0i', 115, 'nairobi', '-1.2873000707050097', '36.821451182008204', 13, 5, 20, 'reports_block|news_block', '2008-08-25 10:25:18');
+/*!40000 ALTER TABLE `settings` DISABLE KEYS */;
+
+INSERT INTO `settings` (`id`, `key`, `value`)
+VALUES
+  (1,'site_name','Ushahidi'),
+  (2,'site_tagline',NULL),
+  (3,'site_banner_id',NULL),
+  (4,'site_email',NULL),
+  (5,'site_key',NULL),
+  (6,'site_language','en_US'),
+  (7,'site_style','default'),
+  (8,'site_timezone',NULL),
+  (9,'site_contact_page','1'),
+  (10,'site_help_page','1'),
+  (11,'site_message',NULL),
+  (12,'site_copyright_statement',NULL),
+  (13,'site_submit_report_message',NULL),
+  (14,'allow_reports','1'),
+  (15,'allow_comments','1'),
+  (16,'allow_feed','1'),
+  (17,'allow_stat_sharing','1'),
+  (18,'allow_clustering','1'),
+  (19,'cache_pages','0'),
+  (20,'cache_pages_lifetime','1800'),
+  (21,'private_deployment','0'),
+  (22,'default_map','osm_mapnik'),
+  (23,'default_map_all','CC0000'),
+  (24,'default_map_all_icon_id',NULL),
+  (25,'api_google','ABQIAAAAjsEM5UsvCPCIHp80spK1kBQnONNwnjgPbDSioH0X5rmWMjc4axQCaMN2CIvMUCsXGLs-5pQ8xAx5cw'),
+  (26,'api_live','Apumcka0uPOF2lKLorq8aeo4nuqfVVeNRqJjqOcLMJ9iMCTsnMsNd9_OvpA8gR0i'),
+  (27,'api_akismet',''),
+  (28,'default_country','115'),
+  (29,'multi_country','0'),
+  (30,'default_city','nairobi'),
+  (31,'default_lat','-1.2873000707050097'),
+  (32,'default_lon','36.821451182008204'),
+  (33,'default_zoom','13'),
+  (34,'items_per_page','5'),
+  (35,'items_per_page_admin','20'),
+  (36,'sms_provider',''),
+  (37,'sms_no1',NULL),
+  (38,'sms_no2',NULL),
+  (39,'sms_no3',NULL),
+  (40,'google_analytics',NULL),
+  (41,'twitter_hashtags',NULL),
+  (42,'blocks','news_block|reports_block'),
+  (43,'blocks_per_row','2'),
+  (44,'date_modify','2008-08-25 10:25:18'),
+  (45,'stat_id',NULL),
+  (46,'stat_key',NULL),
+  (47,'email_username',NULL),
+  (48,'email_password',NULL),
+  (49,'email_port',NULL),
+  (50,'email_host',NULL),
+  (51,'email_servertype',NULL),
+  (52,'email_ssl',NULL),
+  (53,'ftp_server',NULL),
+  (54,'ftp_user_name',NULL),
+  (55,'alerts_email',NULL),
+  (56,'checkins','0'),
+  (57,'facebook_appid',NULL),
+  (58,'facebook_appsecret',NULL),
+  (59,'db_version','94'),
+  (60,'ushahidi_version','2.4'),
+  (61,'allow_alerts','1'),
+  (62,'require_email_confirmation','0'),
+  (63,'manually_approve_users','0'),
+  (64,'enable_timeline','0');
 -- --------------------------------------------------------
 
 /**
@@ -1448,5 +1491,5 @@ CREATE TABLE IF NOT EXISTS `verified` (
  * Version information for table `settings`
  *
  */
-UPDATE `settings` SET `ushahidi_version` = '2.4' WHERE `id`=1 LIMIT 1;
-UPDATE `settings` SET `db_version` = '90' WHERE `id` = 1 LIMIT 1;
+UPDATE `settings` SET `value` = '95' WHERE `key` = 'db_version';
+UPDATE `settings` SET `value` = '2.5b' WHERE `key`= 'ushahidi_version';

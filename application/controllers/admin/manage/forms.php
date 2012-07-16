@@ -21,7 +21,7 @@ class Forms_Controller extends Admin_Controller {
 		$this->template->this_page = 'manage';
 		
 		// If user doesn't have access, redirect to dashboard
-		if ( ! admin::permissions($this->user, "manage"))
+		if ( ! $this->auth->has_permission("manage"))
 		{
 			url::redirect(url::site().'admin/dashboard');
 		}
@@ -33,7 +33,7 @@ class Forms_Controller extends Admin_Controller {
     */
 	public function index()
 	{
-		$this->template->content = new View('admin/forms');
+		$this->template->content = new View('admin/manage/forms/main');
 		
 		// Setup and initialize form field names
 		$form = array
@@ -46,7 +46,8 @@ class Forms_Controller extends Admin_Controller {
 			'field_type' => ''
 	    );
 	
-		// Copy the form as errors, so the errors will be stored with keys corresponding to the form field names
+		// Copy the form as errors, so the errors will be stored with keys 
+		// corresponding to the form field names
 	    $errors = $form;
 		$form_error = FALSE;
 		$form_saved = FALSE;
@@ -162,7 +163,7 @@ class Forms_Controller extends Admin_Controller {
 		$this->template->content->errors = $errors;
 
         // Javascript Header
-        $this->template->js = new View('admin/forms_js');
+        $this->template->js = new View('admin/manage/forms/forms_js');
 		$this->template->js->form_id = $form_id;
 		$this->template->form_error = $form_error;
 	}
@@ -548,7 +549,7 @@ class Forms_Controller extends Admin_Controller {
 		$html .="<div style=\"clear:both;\"></div>";
 		$html .="<div class=\"forms_item\">";
 		$html .="	<div id=\"form_loading_".$form_id."\" class=\"forms_fields_loading\"></div>";
-		$html .="	<input type=\"image\" src=\"".url::base()."media/img/admin/btn-save.gif\" />";
+		$html .="<input type=\"submit\" class=\"save-rep-btn\" value=\"".Kohana::lang('ui_main.save')."\" />";
 		$html .="</div>";
 		$html .="<div style=\"clear:both;\"></div>";
 		$html .=$this->_get_selector_js($form_id);
@@ -660,7 +661,7 @@ class Forms_Controller extends Admin_Controller {
 		$html .="<div style=\"clear:both;\"></div>";
 		$html .="<div class=\"forms_item\">";
 		$html .="	<div id=\"form_loading_".$form_id."\" class=\"forms_fields_loading\"></div>";
-		$html .="	<input type=\"image\" src=\"".url::base()."media/img/admin/btn-save.gif\" />";
+		$html .="<input type=\"submit\" class=\"save-rep-btn\" value=\"".Kohana::lang('ui_main.save')."\" />";
 		$html .="</div>";
 		$html .="<div style=\"clear:both;\"></div>";
 		$html .=$this->_get_selector_js($form_id);
@@ -777,7 +778,7 @@ class Forms_Controller extends Admin_Controller {
 		$html .="<div style=\"clear:both;\"></div>";
 		$html .="<div class=\"forms_item\">";
 		$html .="	<div id=\"form_loading_".$form_id."\" class=\"forms_fields_loading\"></div>";
-		$html .="	<input type=\"image\" src=\"".url::base()."media/img/admin/btn-save.gif\" />";
+		$html .="<input type=\"submit\" class=\"save-rep-btn\" value=\"".Kohana::lang('ui_main.save')."\" />";
 		$html .="</div>";
 		$html .="<div style=\"clear:both;\"></div>";
 		$html .=$this->_get_selector_js($form_id);
@@ -854,7 +855,7 @@ class Forms_Controller extends Admin_Controller {
 		$html .="<div style=\"clear:both;\"></div>";
 		$html .="<div class=\"forms_item\">";
 		$html .="	<div id=\"form_loading_".$form_id."\" class=\"forms_fields_loading\"></div>";
-		$html .="	<input type=\"image\" src=\"".url::base()."media/img/admin/btn-save.gif\" />";
+		$html .="<input type=\"submit\" class=\"save-rep-btn\" value=\"".Kohana::lang('ui_main.save')."\" />";
 		$html .="</div>";
 		$html .="<div style=\"clear:both;\"></div>";
 		$html .=$this->_get_selector_js($form_id);
@@ -930,7 +931,7 @@ class Forms_Controller extends Admin_Controller {
 		$html .="<div style=\"clear:both;\"></div>";
 		$html .="<div class=\"forms_item\">";
 		$html .="	<div id=\"form_loading_".$form_id."\" class=\"forms_fields_loading\"></div>";
-		$html .="	<input type=\"image\" src=\"".url::base()."media/img/admin/btn-save.gif\" />";
+		$html .="<input type=\"submit\" class=\"save-rep-btn\" value=\"".Kohana::lang('ui_main.save')."\" />";
 		$html .="</div>";
 		$html .="<div style=\"clear:both;\"></div>";
 		$html .=$this->_get_selector_js($form_id);

@@ -38,7 +38,7 @@ class Manage_Controller extends Admin_Controller
 		$this->template->this_page = 'manage';
 
 		// If user doesn't have access, redirect to dashboard
-		if ( ! admin::permissions($this->user, "manage"))
+		if ( ! $this->auth->has_permission("manage"))
 		{
 			url::redirect(url::site().'admin/dashboard');
 		}
@@ -49,7 +49,7 @@ class Manage_Controller extends Admin_Controller
 	 */
 	public function index()
 	{
-		$this->template->content = new View('admin/categories');
+		$this->template->content = new View('admin/manage/categories/main');
 		$this->template->content->title = Kohana::lang('ui_admin.categories');
 
 		// Locale (Language) Array
@@ -72,6 +72,7 @@ class Manage_Controller extends Admin_Controller
 		foreach ($locales as $lang_key => $lang_name)
 		{
 			$form['category_title_'.$lang_key] = '';
+			$form['category_description_'.$lang_key] = '';
 		}
 
 		// Copy the form as errors, so the errors will be stored with keys corresponding to the form field names
@@ -93,7 +94,7 @@ class Manage_Controller extends Admin_Controller
 			
 			// Extract category image and category languages for independent validation
 			$secondary_data = arr::extract($post_data, 'category_image',
-				'category_title_lang', 'action');
+				'category_title_lang','category_description_lang', 'action');
 			
 			// Setup validation for the secondary data
 			$post = Validation::factory($secondary_data)
@@ -135,11 +136,17 @@ class Manage_Controller extends Admin_Controller
 					// Save localizations
 					foreach ($post->category_title_lang as $lang_key => $localized_category_name)
 					{
+						// Skip language if same as category locale
+						if ($lang_key == $category->locale) continue;
+						// Skip lang if fields are blank
+						if ($localized_category_name == '' AND $post->category_description_lang[$lang_key] == '') continue;
+						
 						$cl = (isset($category_lang[$lang_key]['id']))
 							? ORM::factory('category_lang',$category_lang[$lang_key]['id'])
 							: ORM::factory('category_lang');
 						
  						$cl->category_title = $localized_category_name;
+ 						$cl->category_description = $post->category_description_lang[$lang_key];
  						$cl->locale = $lang_key;
  						$cl->category_id = $category->id;
 						$cl->save();
@@ -186,7 +193,9 @@ class Manage_Controller extends Admin_Controller
 							if (file_exists(Kohana::config('upload.directory', TRUE).$category_old_image))
 							{
 								unlink(Kohana::config('upload.directory', TRUE).$category_old_image);
-							}elseif(Kohana::config("cdn.cdn_store_dynamic_content") AND valid::url($category_old_image)){
+							}
+							elseif (Kohana::config("cdn.cdn_store_dynamic_content") AND valid::url($category_old_image))
+							{
 								cdn::delete($category_old_image);
 							}
 						}
@@ -234,7 +243,7 @@ class Manage_Controller extends Admin_Controller
 					
 					if ($children)
 					{
-						foreach($children as $child)
+						foreach ($children as $child)
 						{
 							$sub_cat = new Category_Model($child->id);
 							$sub_cat->parent_id = 0;
@@ -286,10 +295,11 @@ class Manage_Controller extends Admin_Controller
 					// @todo Delete the category image
 					
 					// Delete category itself - except if it is trusted
-					ORM::factory('category')
-						->where('category_trusted != 1')
-						->delete($category->id);
-						
+					if (! $category->category_trusted)
+					{
+						$category->delete();
+					}
+					
 					$form_saved = TRUE;
 					$form_action = utf8::strtoupper(Kohana::lang('ui_admin.deleted'));
 				}
@@ -397,7 +407,7 @@ class Manage_Controller extends Admin_Controller
 		// Javascript Header
 		$this->template->colorpicker_enabled = TRUE;
 		$this->template->tablerowsort_enabled = TRUE;
-		$this->template->js = new View('admin/categories_js');
+		$this->template->js = new View('admin/manage/categories/categories_js');
 		$this->template->form_error = $form_error;
 
 		$this->template->content->locale_array = $locales;
@@ -463,12 +473,10 @@ class Manage_Controller extends Admin_Controller
 	 */
 	public function publiclisting()
 	{
-		$this->template->content = new View('admin/publiclisting');
+		$this->template->content = new View('admin/manage/publiclisting');
 		
-		$settings = ORM::factory('settings', 1);
-		
-		$this->template->content->encoded_stat_id = base64_encode($settings->stat_id);
-		$this->template->content->encoded_stat_key = base64_encode($settings->stat_key);
+		$this->template->content->encoded_stat_id = base64_encode(Settings_Model::get_setting('stat_id'));
+		$this->template->content->encoded_stat_key = base64_encode(Settings_Model::get_setting('stat_key'));
 	}
 
 
@@ -477,7 +485,7 @@ class Manage_Controller extends Admin_Controller
 	 */
 	public function pages()
 	{
-		$this->template->content = new View('admin/pages');
+		$this->template->content = new View('admin/manage/pages/main');
 
 		// setup and initialize form field names
 		$form = array
@@ -577,7 +585,7 @@ class Manage_Controller extends Admin_Controller
 
 		// Javascript Header
 		$this->template->editor_enabled = TRUE;
-		$this->template->js = new View('admin/pages_js');
+		$this->template->js = new View('admin/manage/pages/pages_js');
 	}
 
 
@@ -586,7 +594,7 @@ class Manage_Controller extends Admin_Controller
 	 */
 	public function feeds()
 	{
-		$this->template->content = new View('admin/feeds');
+		$this->template->content = new View('admin/manage/feeds/main');
 
 		// setup and initialize form field names
 		$form = array
@@ -681,7 +689,7 @@ class Manage_Controller extends Admin_Controller
 
 		// Javascript Header
 		$this->template->colorpicker_enabled = TRUE;
-		$this->template->js = new View('admin/feeds_js');
+		$this->template->js = new View('admin/manage/feeds/feeds_js');
 	}
 
 	/**
@@ -689,7 +697,7 @@ class Manage_Controller extends Admin_Controller
 	 */
 	public function feeds_items()
 	{
-		$this->template->content = new View('admin/feeds_items');
+		$this->template->content = new View('admin/manage/feeds/items');
 		
 		// Check if the last segment of the URI is numeric and grab it
 		$feed_id = is_numeric($this->uri->last_segment())
@@ -748,7 +756,7 @@ class Manage_Controller extends Admin_Controller
 		$this->template->content->total_items = $pagination->total_items;
 
 		// Javascript Header
-		$this->template->js = new View('admin/feeds_items_js');
+		$this->template->js = new View('admin/manage/feeds/items_js');
 	}
 
 	/**
@@ -756,12 +764,11 @@ class Manage_Controller extends Admin_Controller
 	 */
 	public function layers()
 	{
-		$this->template->content = new View('admin/layers');
+		$this->template->content = new View('admin/manage/layers/main');
 		$this->template->content->title = Kohana::lang('ui_admin.layers');
 
 		// Setup and initialize form field names
-		$form = array
-		(
+		$form = array(
 			'action' => '',
 			'layer_id' => '',
 			'layer_name' => '',
@@ -831,7 +838,12 @@ class Manage_Controller extends Admin_Controller
 									$ext_file_name = $file['filename'];
 									$archive_file_parts = pathinfo($ext_file_name);
 									//because there can be more than one file in a KMZ
-									if ($archive_file_parts['extension'] == 'kml' AND $ext_file_name AND $archive->extract(PCLZIP_OPT_PATH, Kohana::config('upload.directory')) == TRUE)
+									if
+									(
+										$archive_file_parts['extension'] == 'kml' AND
+										$ext_file_name AND
+										$archive->extract(PCLZIP_OPT_PATH, Kohana::config('upload.directory')) == TRUE
+									)
 									{ 
 										// Okay, so we have an extracted KML - Rename it and delete KMZ file
 										rename($path_parts['dirname']."/".$ext_file_name, 
@@ -956,7 +968,7 @@ class Manage_Controller extends Admin_Controller
 
 		// Javascript Header
 		$this->template->colorpicker_enabled = TRUE;
-		$this->template->js = new View('admin/layers_js');
+		$this->template->js = new View('admin/manage/layers/layers_js');
 	}
 
 	/**
@@ -964,7 +976,7 @@ class Manage_Controller extends Admin_Controller
 	 */
 	public function levels()
 	{
-		$this->template->content = new View('admin/levels');
+		$this->template->content = new View('admin/manage/levels');
 		$this->template->content->title = Kohana::lang('ui_admin.reporter_levels');
 
 		// setup and initialize form field names

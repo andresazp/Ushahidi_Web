@@ -22,7 +22,7 @@ class Messages_Controller extends Admin_Controller {
 		$this->template->this_page = 'messages';
 
 		// If user doesn't have access, redirect to dashboard
-		if ( ! admin::permissions($this->user, "messages"))
+		if ( ! $this->auth->has_permission("messages"))
 		{
 			url::redirect(url::site().'admin/dashboard');
 		}
@@ -38,7 +38,7 @@ class Messages_Controller extends Admin_Controller {
 		$db_config = Kohana::config('database.default');
 		$table_prefix = $db_config['table_prefix'];
 
-		$this->template->content = new View('admin/messages');
+		$this->template->content = new View('admin/messages/main');
 
 		// Get Title
 		$service = ORM::factory('service', $service_id);
@@ -78,7 +78,7 @@ class Messages_Controller extends Admin_Controller {
 		// Do we have a reporter ID?
 		if (isset($_GET['rid']) AND !empty($_GET['rid']))
 		{
-			$filter .= ' AND message.reporter_id=\''.$_GET['rid'].'\'';
+			$filter .= ' AND message.reporter_id=\''.intval($_GET['rid']).'\'';
 		}
         
 		// ALL / Trusted / Spam
@@ -245,7 +245,7 @@ class Messages_Controller extends Admin_Controller {
 		$this->template->content->level = $level;
 
 		// Javascript Header
-		$this->template->js = new View('admin/messages_js');
+		$this->template->js = new View('admin/messages/messages_js');
 	}
 
 	/**
@@ -353,7 +353,7 @@ class Messages_Controller extends Admin_Controller {
 							// Message Failed 
 							echo json_encode(array(
 								"status" => "error", 
-								"message" => Kohana::lang('ui_admin.error')." - " . $response
+								"message" => Kohana::lang('ui_admin.error_msg')." - " . $response
 							));
 						}
 					}
@@ -361,7 +361,7 @@ class Messages_Controller extends Admin_Controller {
 					{
 						echo json_encode(array(
 							"status" => "error",
-							"message" => Kohana::lang('ui_admin.error').Kohana::lang('ui_admin.check_sms_settings')
+							"message" => Kohana::lang('ui_admin.error_msg').Kohana::lang('ui_admin.check_sms_settings')
 						));
 					}
 				}
@@ -370,7 +370,7 @@ class Messages_Controller extends Admin_Controller {
 					// Send_To Mobile Number Doesn't Exist
 					echo json_encode(array(
 						"status" => "error", 
-						"message" => Kohana::lang('ui_admin.error').Kohana::lang('ui_admin.check_number')
+						"message" => Kohana::lang('ui_admin.error_msg').Kohana::lang('ui_admin.check_number')
 					));
 				}
 			}
@@ -383,7 +383,7 @@ class Messages_Controller extends Admin_Controller {
 
 				echo json_encode(array(
 					"status" => "error",
-					"message" => Kohana::lang('ui_admin.error').Kohana::lang('ui_admin.check_message_valid')
+					"message" => Kohana::lang('ui_admin.error_msg').Kohana::lang('ui_admin.check_message_valid')
 				));
 			}
 		}

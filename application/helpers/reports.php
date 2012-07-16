@@ -23,14 +23,19 @@ class reports_Core {
 	 */
 	public static $params = array();
 	
+	/**
+	 * Pagination object user in fetch_incidents method
+	 * @var Pagination
+	 */
+	public static $pagination = array();
+	
 			
 	/**
 	 * Validation of form fields
 	 *
 	 * @param array $post Values to be validated
-	 * @param bool $admin_section Whether the validation is for the admin section
 	 */
-	public static function validate(array & $post, $admin_section = FALSE)
+	public static function validate(array & $post)
 	{
 
 		// Exception handling
@@ -44,9 +49,10 @@ class reports_Core {
 				->add_rules('incident_description','required')
 				->add_rules('incident_date','required','date_mmddyyyy')
 				->add_rules('incident_hour','required','between[1,12]')
-				->add_rules('incident_minute','required','between[0,59]');
+				->add_rules('incident_minute','required','between[0,59]')
+				->add_rules('incident_ampm','required');
 			
-		if ($post->incident_ampm != "am" AND $post->incident_ampm != "pm")
+		if (isset($post->incident_ampm) AND $post->incident_ampm != "am" AND $post->incident_ampm != "pm")
 		{
 			$post->add_error('incident_ampm','values');
 		}
@@ -99,7 +105,7 @@ class reports_Core {
 			$country = Country_Model::get_country_by_name($post->country_name);
 			if ($country AND $country->id != Kohana::config('settings.default_country'))
 			{
-				$post->add_error('country_name','single_country');
+				$post->add_error('country_name','single_country', array(ORM::factory('country', Kohana::config('settings.default_country'))->country) );
 			}
 		}
 		
@@ -112,26 +118,33 @@ class reports_Core {
 		{
 			$post->add_rules('person_first', 'length[2,100]');
 		}
+		else
+		{
+			$post->person_first = '';
+		}
 
 		if ( ! empty($post->person_last))
 		{
 			$post->add_rules('person_last', 'length[2,100]');
+		}
+		else
+		{
+			$post->person_last = '';
 		}
 
 		if ( ! empty($post->person_email))
 		{
 			$post->add_rules('person_email', 'email', 'length[3,100]');
 		}
-		
-		// Extra validation rules for the admin section
-		if ($admin_section)
+		else
 		{
-			$post->add_rules('location_id','numeric');
-			$post->add_rules('message_id','numeric');
-			$post->add_rules('incident_active','required', 'between[0,1]');
-			$post->add_rules('incident_verified','required', 'between[0,1]');
-			$post->add_rules('incident_zoom', 'numeric');
+			$post->person_email = '';
 		}
+		
+		$post->add_rules('location_id','numeric');
+		$post->add_rules('incident_active', 'between[0,1]');
+		$post->add_rules('incident_verified', 'between[0,1]');
+		$post->add_rules('incident_zoom', 'numeric');
 		
 		// Custom form fields validation
 		$errors = customforms::validate_custom_form_fields($post);
@@ -210,7 +223,7 @@ class reports_Core {
 			// Edit
 			$incident->incident_datemodify = date("Y-m-d H:i:s",time());
 		}
-		else		
+		else
 		{
 			// New
 			$incident->incident_dateadd = date("Y-m-d H:i:s",time());
@@ -266,13 +279,13 @@ class reports_Core {
 			}
 		}
 		
-		// Approval Status
-		if (isset($post->incident_active))
+		// Approval Status: Only set if user has permission
+		if (isset($post->incident_active) AND Auth::instance()->has_permission('reports_approve'))
 		{
 			$incident->incident_active = $post->incident_active;
 		}
-		// Verification status
-		if (isset($post->incident_verified))
+		// Verification status:  Only set if user has permission
+		if (isset($post->incident_verified) AND Auth::instance()->has_permission('reports_verify'))
 		{
 			$incident->incident_verified = $post->incident_verified;
 		}
@@ -302,29 +315,28 @@ class reports_Core {
 	/**
 	 * Function to record the verification/approval actions
 	 *
-	 * @param mixed $post
-	 * @param mixed $verify Instance of the verify model
 	 * @param mixed $incident
 	 */
-	public static function verify_approve($post, $verify, $incident)
+	public static function verify_approve($incident)
 	{
 		// @todo Exception handling
 		
+		$verify = new Verify_Model();
 		$verify->incident_id = $incident->id;
 		
 		// Record 'Verified By' Action
-		$verify->user_id = $_SESSION['auth_user']->id;			
+		$verify->user_id = $_SESSION['auth_user']->id;
 		$verify->verified_date = date("Y-m-d H:i:s",time());
-				
-		if ($post->incident_active == 1)
+		
+		if ($incident->incident_active == 1)
 		{
 			$verify->verified_status = '1';
 		}
-		elseif ($post->incident_verified == 1)
+		elseif ($incident->incident_verified == 1)
 		{
 			$verify->verified_status = '2';
 		}
-		elseif ($post->incident_active == 1 AND $post->incident_verified == 1)
+		elseif ($incident->incident_active == 1 AND $incident->incident_verified == 1)
 		{
 			$verify->verified_status = '3';
 		}
@@ -334,7 +346,7 @@ class reports_Core {
 		}
 		
 		// Save
-		$verify->save();		
+		$verify->save();
 	} 
 	
 	/**
@@ -460,26 +472,34 @@ class reports_Core {
 		{
 			$filenames = upload::save('incident_photo');
 			$i = 1;
+
 			foreach ($filenames as $filename)
 			{
 				$new_filename = $incident->id.'_'.$i.'_'.time();
 
 				$file_type = strrev(substr(strrev($filename),0,4));
-						
+				
 				// IMAGE SIZES: 800X600, 400X300, 89X59
-						
-				// Large size
-				Image::factory($filename)->resize(800,600,Image::AUTO)
-					->save(Kohana::config('upload.directory', TRUE).$new_filename.$file_type);
+				// Catch any errors from corrupt image files
+				try
+				{
+					// Large size
+					Image::factory($filename)->resize(800,600,Image::AUTO)
+						->save(Kohana::config('upload.directory', TRUE).$new_filename.$file_type);
 
-				// Medium size
-				Image::factory($filename)->resize(400,300,Image::HEIGHT)
-					->save(Kohana::config('upload.directory', TRUE).$new_filename.'_m'.$file_type);
-						
-				// Thumbnail
-				Image::factory($filename)->resize(89,59,Image::HEIGHT)
-					->save(Kohana::config('upload.directory', TRUE).$new_filename.'_t'.$file_type);
-					
+					// Medium size
+					Image::factory($filename)->resize(400,300,Image::HEIGHT)
+						->save(Kohana::config('upload.directory', TRUE).$new_filename.'_m'.$file_type);
+
+					// Thumbnail
+					Image::factory($filename)->resize(89,59,Image::HEIGHT)
+						->save(Kohana::config('upload.directory', TRUE).$new_filename.'_t'.$file_type);
+				}
+				catch (Kohana_Exception $e)
+				{
+					// Do nothing. Too late to throw errors
+				}
+				
 				// Name the files for the DB
 				$media_link = $new_filename.$file_type;
 				$media_medium = $new_filename.'_m'.$file_type;
@@ -601,14 +621,14 @@ class reports_Core {
 		$table_prefix = Kohana::config('database.default.table_prefix');
 		
 		// Fetch the URL data into a local variable
-		$url_data = array_merge($_GET);
+		$url_data = $_GET;
 		
 		// Split selected parameters on ","
 		// For simplicity, always turn them into arrays even theres just one value
 		$exclude_params = array('c', 'v', 'm', 'mode', 'sw', 'ne', 'start_loc');
 		foreach ($url_data as $key => $value)
 		{
-			if (in_array($key, $exclude_params) AND !is_array($value))
+			if (in_array($key, $exclude_params) AND ! is_array($value))
 			{
 				$url_data[$key] = explode(",", $value);
 			}
@@ -861,31 +881,54 @@ class reports_Core {
 		
 		//> END PARAMETER FETCH
 
-		
-		// Fetch all the incidents
-		$all_incidents = Incident_Model::get_incidents(self::$params);
+		// Check for order and sort params
+		$order_field = NULL; $sort = NULL;
+		$order_options = array(
+			'title' => 'i.incident_title',
+			'date' => 'i.incident_date',
+			'id' => 'i.id'
+		);
+		if (isset($url_data['order']) AND isset($order_options[$url_data['order']]))
+		{
+			$order_field = $order_options[$url_data['order']];
+		}
+		if (isset($url_data['sort']))
+		{
+			$sort = (strtoupper($url_data['sort']) == 'ASC') ? 'ASC' : 'DESC';
+		}
 		
 		if ($paginate)
 		{
+			// Fetch incident count
+			$incident_count = Incident_Model::get_incidents(self::$params, false, $order_field, $sort, TRUE);
+			
 			// Set up pagination
 			$page_limit = (intval($items_per_page) > 0)
 			    ? $items_per_page 
 			    : intval(Kohana::config('settings.items_per_page'));
+					
+			$total_items = $incident_count->current()
+					? $incident_count->current()->report_count
+					: 0;
 			
 			$pagination = new Pagination(array(
 					'style' => 'front-end-reports',
 					'query_string' => 'page',
 					'items_per_page' => $page_limit,
-					'total_items' => $all_incidents->count()
-					));
+					'total_items' => $total_items
+				));
+			
+			Event::run('ushahidi_filter.pagination',$pagination);
+			
+			self::$pagination = $pagination;
 			
 			// Return paginated results
-			return Incident_Model::get_incidents(self::$params, $pagination);
+			return Incident_Model::get_incidents(self::$params, self::$pagination, $order_field, $sort);
 		}
 		else
 		{
 			// Return
-			return $all_incidents;
+			return Incident_Model::get_incidents(self::$params, false, $order_field, $sort);;
 		}
 	}	
 }
