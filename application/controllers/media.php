@@ -81,29 +81,9 @@ class Media_Controller extends Controller {
             $file_data = $this->_css_compress($file_data);
         }
 
-        if ($ext == "js" AND strpos($file,'.min.js') === FALSE AND strpos($file,'.pack.js') === FALSE)
-        { // Compress JS data
-            $file_data = $this->_js_compress($file_data);
-        }
-
         // HTTP Headers
         $expiry_time = 613200;  // 1 Week
-        // Find mime-type
-        $mimetypes = array(
-            'gif' => 'image/gif',
-            'png' => 'image/png',
-            'jpg' => 'image/jpg',
-            'jpeg' => 'image/jpg',
-            'css' => 'text/css',
-            'js' => 'text/javascript',
-        );
-        $path_parts = pathinfo($file);
-        if (array_key_exists($path_parts['extension'], $mimetypes)) {
-            $mime = $mimetypes[$path_parts['extension']];
-        } else {
-            $mime = 'application/octet-stream';
-        }
-
+        $mime = ($ext == 'css') ? 'text/css' : 'application/javascript';
         header('Content-type: '.$mime);
         header('Cache-Control: must-revalidate');
         header('Expires: '.gmdate("D, d M Y H:i:s", time() + $expiry_time).' GMT');
@@ -123,7 +103,12 @@ class Media_Controller extends Controller {
         }
         else
         {
-            echo $file_data;
+            if (strpos($accencoding, 'gzip') !== false AND $gzip)
+            {
+                header('Content-Encoding: gzip');
+                echo gzencode($file_data);
+            }
+            else echo $file_data;
         }
     }
 
@@ -149,7 +134,8 @@ class Media_Controller extends Controller {
 
     private function _js_compress($data)
     {
-        return Minify_Js_Driver::minify($data);
+        $packer = new JavaScriptPacker($data, $this->pack_js);
+        return $packer->pack();
     }
 
 }
