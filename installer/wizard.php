@@ -639,16 +639,20 @@ class Installer_Wizard {
 			$find = array(
 				'CREATE TABLE IF NOT EXISTS `',
 				'INSERT INTO `',
+				'INSERT IGNORE INTO `',
 				'ALTER TABLE `',
 				'UPDATE `',
-				'DELETE FROM `'
+				'DELETE FROM `',
+				'LOCK TABLES `',
 			);
 			$replace = array(
-				'CREATE TABLE IF NOT EXISTS `'.$table_prefix.'_',
-				'INSERT INTO `'.$table_prefix.'_',
-				'ALTER TABLE `'.$table_prefix.'_',
-				'UPDATE `'.$table_prefix.'_',
-				'DELETE FROM `'.$table_prefix.'_'
+				'CREATE TABLE IF NOT EXISTS `'.$table_prefix,
+				'INSERT INTO `'.$table_prefix,
+				'INSERT IGNORE INTO `'.$table_prefix,
+				'ALTER TABLE `'.$table_prefix,
+				'UPDATE `'.$table_prefix,
+				'DELETE FROM `'.$table_prefix,
+				'LOCK TABLES `'.$table_prefix,
 			);
 		
 			$schema_ddl = str_replace($find, $replace, $schema_ddl);
@@ -687,7 +691,7 @@ class Installer_Wizard {
 		
 		if ( ! mysql_select_db($database_name))
 		{
-			if (self::_execute_query(sprintf("CREATE DATABASE %s", $database_name)))
+			if (self::_execute_query(sprintf("CREATE DATABASE %s", self::_escape_str($database_name))))
 			{
 				mysql_select_db($database_name, self::$_connection);
 			}
@@ -725,6 +729,20 @@ class Installer_Wizard {
 	}
 	
 	/**
+	 * Escape string for the database
+	 * @param string $query
+	 */
+	private static function _escape_str($string)
+	{
+		if (self::$_connection === FALSE)
+		{
+			self::_database_connect();
+		}
+		
+		return mysql_real_escape_string($string);
+	}
+	
+	/**
 	 * Creates the database configuration file - database.php
 	 */
 	private static function _create_database_config()
@@ -743,7 +761,8 @@ class Installer_Wizard {
 					'user' => $params['username'],
 					'pass' => $params['password'],
 					'host' => $params['host'],
-					'database' => $params['database_name']
+					'database' => $params['database_name'],
+					'table_prefix' => $params['table_prefix']
 				);
 				
 				foreach ($template_file as $line_no => $line)
@@ -966,17 +985,19 @@ class Installer_Wizard {
 	 */
 	private static function _update_settings($params)
 	{
-		$query = "UPDATE ".self::$_data['database']['table_prefix']."`settings` SET `value` = CASE `key` ";
+		$query = "UPDATE `".self::$_data['database']['table_prefix']."settings` SET `value` = CASE `key` ";
 		
 		// Update the site settings
+		$settings_keys = array();
 		foreach ($params as $param)
 		{
 			if ( ! isset($_POST[$param]))
 				continue;
-			$query .= sprintf("WHEN '%s' THEN '%s' ", $param, $_POST[$param]);
+			$settings_keys[] = self::_escape_str($param);
+			$query .= sprintf("WHEN '%s' THEN '%s' ", self::_escape_str($param), self::_escape_str($_POST[$param]));
 		}
 		
-		$settings_keys = "'".implode("','", $params)."'";
+		$settings_keys = "'".implode("','", $settings_keys)."'";
 		$query .= sprintf('END WHERE `key` IN (%s)', $settings_keys);
 		
 		return self::_execute_query($query);
@@ -989,11 +1010,11 @@ class Installer_Wizard {
 	public static function install_map()
 	{
 		extract($_POST);
-		$exempt_providers = array('osm_mapnik');
+		$api_key_mapping = array('bing_road' => 'api_live');
 		
-		$api_key_mapping = array(
-			'google_normal' => 'api_google',
-			'bing_road' => 'api_live'
+		$exempt_providers = array(
+			'google_normal',
+			'osm_mapnik'
 		);
 		
 		if (empty($default_map))
@@ -1005,22 +1026,20 @@ class Installer_Wizard {
 		// Build the update query
 		$table_prefix = self::$_data['database']['table_prefix'];
 		
-		$query = sprintf("UPDATE `%ssettings` SET `value` = CASE `key` ", $table_prefix);
-		$query .= sprintf("WHEN 'default_map' THEN '%s' ", $default_map);
+		// Running as 2 seperate updates because the CASE method is messy and pointless with just 2 keys anyway
+		$query = sprintf("UPDATE `%ssettings` SET `value` = '%s' WHERE `key` = 'default_map'", $table_prefix, self::_escape_str($default_map) );
 		
-		$settings_keys = array("'default_map'");
-		
-		// Check for BingMaps and Google API Key
+		$result = TRUE;
+		// Check for BingMaps API Key
 		if ( ! in_array($default_map, $exempt_providers))
 		{
 			// Check for the API key
 			if ( ! empty($api_key))
 			{
 				$setting_id = $api_key_mapping[$default_map];
-
-				array_push($settings_keys, "'" + $setting_id + "'");
 				
-				$query .= sprinf("WHEN '%s' THEN '%s'", $setting_id, $api_key);
+				$query = sprintf("UPDATE `%ssettings` SET `value` = '%s' WHERE `key` = '%s' ", $table_prefix, self::_escape_str($api_key), self::_escape_str($setting_id) );
+				$result = self::_execute_query($query) AND $result;
 			}
 			else
 			{
@@ -1028,10 +1047,9 @@ class Installer_Wizard {
 				return FALSE;
 			}
 		}
+		$result = self::_execute_query($query) AND $result;
 		
-		$query .= sprintf("END WHERE `key` IN (%s)", implode(",", $settings_keys));
-		
-		return self::_execute_query($query);
+		return $result;
 		
 	}
 	
@@ -1072,8 +1090,8 @@ class Installer_Wizard {
 				
 		// Update the admin user password
 		$query = sprintf("UPDATE `%susers` SET `email` = '%s', `password` = '%s' WHERE `username` = 'admin'", 
-			$table_prefix, $email, $password_hash);
-		
+			$table_prefix, self::_escape_str($email), self::_escape_str($password_hash));
+
 		self::$_data['admin_email'] = $email;
 		 
 		return self::_execute_query($query);

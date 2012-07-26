@@ -99,7 +99,7 @@ class Upgrade_Controller extends Admin_Controller {
 				$form = arr::overwrite($form, $post->as_array());
 
 				// populate the error fields, if any
-				$errors = arr::overwrite($errors, $post->errors('upgrade'));
+				$errors = $post->errors('upgrade');
 				$form_error = TRUE;
 			}
 		}
@@ -163,7 +163,6 @@ class Upgrade_Controller extends Admin_Controller {
 			}
 		}
 		
-		
 		if ($step == 2)
 		{
 			//extract compressed file
@@ -187,6 +186,14 @@ class Upgrade_Controller extends Admin_Controller {
 		{
 			//copy files
 			$this->upgrade->ftp_recursively($working_dir."ushahidi/",DOCROOT);
+			$this->upgrade->remove_old($working_dir.'ushahidi/upgrader_removed_files.txt', DOCROOT);
+			
+			// Clear out caches before new request
+			Cache::instance()->delete_all();
+			Kohana::cache_save('configuration', NULL, Kohana::config('core.internal_cache'));
+			Kohana::cache_save('language', NULL, Kohana::config('core.internal_cache'));
+			Kohana::cache_save('find_file_paths', NULL, Kohana::config('core.internal_cache'));
+			Event::clear('system.shutdown', array('Kohana', 'internal_cache_save'));
 			
 			//copying was successful
 			if ($this->upgrade->success)
@@ -212,9 +219,9 @@ class Upgrade_Controller extends Admin_Controller {
 			
 			if (empty($error))
 			{
-				if (file_exists($working_dir."/ushahidi/sql"))
+				if (file_exists(DOCROOT."sql/"))
 				{
-					$this->_process_db_upgrade($working_dir."ushahidi/sql/");
+					$this->_process_db_upgrade(DOCROOT."sql/");
 				}
 				$this->upgrade->logger("Database backup and upgrade successful.");
 				echo json_encode(array("status"=>"success", "message"=>Kohana::lang('upgrade.backup_success')));
@@ -230,10 +237,10 @@ class Upgrade_Controller extends Admin_Controller {
 		// Database UPGRADE ONLY
 		if ($step == 5)
 		{
-			if (file_exists($working_dir."ushahidi/sql"))
+			if (file_exists(DOCROOT."sql/"))
 			{
 				//upgrade tables
-				$this->_process_db_upgrade($working_dir."ushahidi/sql/");
+				$this->_process_db_upgrade(DOCROOT."sql/");
 				$this->upgrade->logger("Database upgrade successful.");
 				echo json_encode(array("status"=>"success", "message"=>Kohana::lang('upgrade.dbupgrade_success')));
 			}
@@ -303,13 +310,92 @@ class Upgrade_Controller extends Admin_Controller {
 	}
 	
 	/**
+	 * UI for running database upgrades after manual code update
+	 **/
+	public function database()
+	{
+		$this->template->content = new View('admin/upgrade/upgrade_database');
+		$this->template->content->errors = array();
+		$this->template->content->form_error = FALSE;
+		$this->template->content->form_saved = FALSE;
+		
+		//check if form has been submitted
+		if ( $_POST )
+		{
+			// For sanity sake, validate the data received from users.
+			$post = Validation::factory($_POST);
+
+			// Add some filters
+			$post->pre_filter('trim', TRUE);
+			
+			$post->add_rules('chk_db_backup_box', 'between[0,1]');
+			
+			if ($post->validate())
+			{
+				$this->upgrade->logger("STARTED DB UPGRADE\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+				
+				$working_dir = DOCROOT;
+				
+				// Database BACKUP + UPGRADE
+				if ($post->chk_db_backup_box == 1)
+				{
+					// backup database.
+					// is gzip enabled ?
+					$gzip = Kohana::config('config.output_compression');
+					$error = $this->_do_db_backup( $gzip );
+					
+					if (empty($error))
+					{
+						if (file_exists($working_dir."sql"))
+						{
+							$this->_process_db_upgrade($working_dir."sql/");
+						}
+						$this->upgrade->logger("Database backup and upgrade successful.");
+						$this->template->content->message = Kohana::lang('upgrade.backup_success');
+						$this->template->content->form_saved = TRUE;
+					}
+					else
+					{
+						$this->upgrade->logger("** Failed backing up database.\n\n");
+						$this->template->content->errors = array(Kohana::lang('upgrade.backup_failed'));
+						$this->template->content->form_error = TRUE;
+					}
+				}
+				else
+				// Database UPGRADE ONLY
+				{
+					if (file_exists($working_dir."sql"))
+					{
+						//upgrade tables
+						$this->_process_db_upgrade($working_dir."sql/");
+					}
+					$this->upgrade->logger("Database upgrade successful.");
+					$this->template->content->message = Kohana::lang('upgrade.dbupgrade_success');
+					$this->template->content->form_saved = TRUE;
+				}
+			}
+			 // No! We have validation errors, we need to show the form again, with the errors
+			else
+			{
+				// populate the error fields, if any
+				$this->template->content->errors = $post->errors('upgrade');
+				$this->template->content->form_error = TRUE;
+			}
+		}
+		
+		$this->template->content->current_version = Kohana::config('settings.ushahidi_version');
+		$this->template->content->current_db_version = Kohana::config('settings.db_version');
+		$this->template->content->environment = $this->_environment();
+		
+	}
+	
+	/**
 	 * Execute SQL statement to upgrade the necessary tables.
 	 *
 	 * @param string - upgrade_sql - upgrade sql file
 	 */
 	private function _execute_upgrade_script($upgrade_sql) 
 	{
-		
 		$upgrade_schema = @file_get_contents($upgrade_sql);
 
 		// If a table prefix is specified, add it to sql
@@ -321,15 +407,21 @@ class Upgrade_Controller extends Admin_Controller {
 			$find = array(
 				'CREATE TABLE IF NOT EXISTS `',
 				'INSERT INTO `',
+				'INSERT IGNORE INTO `',
 				'ALTER TABLE `',
-				'UPDATE `'
+				'UPDATE `',
+				'DELETE FROM `',
+				'LOCK TABLES `',
 			);
 			
 			$replace = array(
-				'CREATE TABLE IF NOT EXISTS `'.$table_prefix.'_',
-				'INSERT INTO `'.$table_prefix.'_',
-				'ALTER TABLE `'.$table_prefix.'_',
-				'UPDATE `'.$table_prefix.'_'
+				'CREATE TABLE IF NOT EXISTS `'.$table_prefix,
+				'INSERT INTO `'.$table_prefix,
+				'INSERT IGNORE INTO `'.$table_prefix,
+				'ALTER TABLE `'.$table_prefix,
+				'UPDATE `'.$table_prefix,
+				'DELETE FROM `'.$table_prefix,
+				'LOCK TABLES `'.$table_prefix,
 			);
 			
 			$upgrade_schema = str_replace($find, $replace, $upgrade_schema);
@@ -342,7 +434,12 @@ class Upgrade_Controller extends Admin_Controller {
 	
 		foreach ($queries as $query)
 		{
-			$result = $this->db->query($query);
+			// Trim whitespace and make sure we're not running an empty query (for example from the new line after the last query.)
+			$query = trim($query);
+			if (!empty($query))
+			{
+				$result = $this->db->query($query);
+			}
 		}
 			
 		// Delete cache
@@ -357,34 +454,52 @@ class Upgrade_Controller extends Admin_Controller {
 	 */
 	private function _process_db_upgrade($dir_path)
 	{
-	
-		$upgrade_sql = '';
-
-		$files = scandir($dir_path);
-		sort($files);
-		foreach ( $files as $file )
+		ini_set('max_execution_time', 300);
+		
+		$file = $dir_path . $this->_get_next_db_upgrade();
+		$this->upgrade->logger("Looking for update file: ".$file);
+		while ( file_exists($file) AND is_file($file) )
 		{
-			// We're going to try and execute each of the sql files in order
-			$file_ext = strrev(substr(strrev($file),0,4));
-			if ($file_ext == ".sql")
-			{
-				$this->upgrade->logger("Database imported ".$dir_path.$file);
-				$this->_execute_upgrade_script($dir_path.$file);
-			}
+			$this->upgrade->logger("Database imported ".$file);
+			$this->_execute_upgrade_script($file);
+			
+			// Get the next file
+			$file = $dir_path . $this->_get_next_db_upgrade();
+			$this->upgrade->logger("Looking for update file: ".$file);
 		}
-		return "";
+		return;
 	}
 	
 	/**
-	 * Gets the current db version of the ushahidi deployment.
+	 * Gets the file name for the next db upgrade script
 	 * 
 	 * @return the db version.
 	 */
-	private function _get_db_version()
+	private function _get_next_db_upgrade()
 	{
-			
-		// get the db version from the settings page
-		$version_in_db = Settings_Model::get_setting('db_version');
+		// get the db version from the settings
+		try
+		{
+			$query = Database::instance()->query('SELECT `value` FROM '.Kohana::config('database.default.table_prefix').'settings WHERE `key` = \'db_version\' LIMIT 1')->current();
+			$version_in_db = $query->value;
+		}
+		catch (Exception $e)
+		{
+			$query = Database::instance()->query('SELECT `db_version` FROM '.Kohana::config('database.default.table_prefix').'settings LIMIT 1')->current();
+			$version_in_db = $query->db_version;
+		}
+		
+		// Just in case we get a DB fail.
+		if ($version_in_db == NULL)
+		{
+			return FALSE;
+		}
+		
+		// Special case for really old Ushahidi version
+		if ($version_in_db < 11)
+		{
+			return 'upgrade.sql';
+		}
 		
 		// Update DB
 		$db_version = $version_in_db;
@@ -502,11 +617,11 @@ class Upgrade_Controller extends Admin_Controller {
 			unlink($tmpnam);
 		}
 		else
-		{		 
+		{
 			passthru($command, $error);
 		}
-				   
-		return $error;	
+		
+		return $error;
 	}
 	
 	/**
