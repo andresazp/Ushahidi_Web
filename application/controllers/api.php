@@ -24,9 +24,6 @@ class Api_Controller extends Controller {
 	 */
 	public function index()
 	{
-		// Insecure and disabled
-		return;
-		
 		// Disables CSRF validation for API requests
 		Validation::$is_api_request = TRUE;
 
