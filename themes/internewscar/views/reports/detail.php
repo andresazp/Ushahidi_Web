@@ -34,11 +34,10 @@
 		<div class="report-category-list">
 		<p>
 			<?php
-				foreach($incident_category as $category)
+				foreach ($incident_category as $category)
 				{
-
 					// don't show hidden categoies
-					if($category->category->category_visible == 0)
+					if ($category->category->category_visible == 0)
 					{
 						continue;
 					}
