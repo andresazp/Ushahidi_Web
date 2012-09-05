@@ -174,7 +174,7 @@
 										: $countries[Kohana::config('settings.default_country')]; 
 									
 									// Incident location
-									$incident_location = $incident->location_id ? $incident->location_name.', '.$country_name : Kohana::lang('ui_main.none');
+									$incident_location = $incident->location_id ? $incident->location_name/*.', '.$country_name*/ : Kohana::lang('ui_main.none');
 							
 									// Retrieve Incident Categories
 									$incident_category = "";
