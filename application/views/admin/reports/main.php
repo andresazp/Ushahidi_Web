@@ -195,18 +195,25 @@
 									$incident_verified = $incident->incident_verified;
 									
 									// Get Edit Log
-									$edit_count = $incident_orm->verify->count();
+									//$edit_count = $incident_orm->verify->count();
+									$edit_count = $incident_orm->revision_incidents->count();
 									$edit_css = ($edit_count == 0) ? "post-edit-log-gray" : "post-edit-log-blue";
 									
 									$edit_log  = "<div class=\"".$edit_css."\">"
 										. "<a href=\"javascript:showLog('edit_log_".$incident_id."')\">".Kohana::lang('ui_admin.edit_log').":</a> (".$edit_count.")</div>"
 										. "<div id=\"edit_log_".$incident_id."\" class=\"post-edit-log\"><ul>";
 									
-									foreach ($incident_orm->verify as $verify)
+									/*foreach ($incident_orm->verify as $verify)
 									{
 										$edit_log .= "<li>".Kohana::lang('ui_admin.edited_by')." ".html::specialchars($verify->user->name)." : ".$verify->verified_date."</li>";
 									}
-									$edit_log .= "</ul></div>";
+									$edit_log .= "</ul></div>";*/
+									
+									foreach ($incident_orm->revision_incidents as $revision)
+									{
+										$edit_log .= "<li>$revision</li>";
+									}
+									$edit_log .= "</ul><a href='". url::site('admin/reports/revision/diff/'.$incident_id)."'>Full revision log</a></div>";
 
 									// Get Any Translations
 									$i = 1;
