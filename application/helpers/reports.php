@@ -199,10 +199,11 @@ class reports_Core {
 	 * @param Validation $post Validation object with the data to be saved
 	 * @param Incident_Model $incident Incident_Model instance to be modified
 	 * @param Location_Model $location_model Location to be attached to the incident
+	 * @param Bool $save automatically save the report after fields are updated
 	 * @param int $id ID no. of the report
 	 *
 	 */
-	public static function save_report($post, $incident, $location_id)
+	public static function save_report($post, $incident, $location_id, $save = TRUE)
 	{
 		// Exception handling
 		if ( ! $post instanceof Validation_Core AND  ! $incident instanceof Incident_Model)
