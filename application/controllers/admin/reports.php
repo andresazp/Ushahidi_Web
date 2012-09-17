@@ -296,6 +296,38 @@ class Reports_Controller extends Admin_Controller {
 		$this->template->content->order_field = $order_field;
 		$this->template->content->sort = $sort;
 		
+		$this->template->map_enabled = TRUE;
+		$this->template->json2_enabled = TRUE;
+		$this->template->treeview_enabled = TRUE;
+		
+		// Get the date of the oldest report
+		if (isset($_GET['s']) AND !empty($_GET['s']) AND intval($_GET['s']) > 0)
+		{
+			$date_from =  intval($_GET['s']);
+		}
+		else
+		{
+			$date_from = Incident_Model::get_oldest_report_timestamp();
+		}
+
+		// Get the date of the latest report
+		if (isset($_GET['e']) AND !empty($_GET['e']) AND intval($_GET['e']) > 0)
+		{
+			$date_to = intval($_GET['e']);
+		}
+		else
+		{
+			$date_to = Incident_Model::get_latest_report_timestamp();
+		}
+		$this->template->content->date_from = $date_from;
+		$this->template->content->date_to = $date_to;
+		
+		// Load the alert radius view
+		$alert_radius_view = new View('alerts/radius');
+		$alert_radius_view->show_usage_info = FALSE;
+		$alert_radius_view->enable_find_location = FALSE;
+		$alert_radius_view->css_class = "map_holder_reports";
+		$this->template->content->alert_radius_view = $alert_radius_view;
 
 		// Javascript Header
 		$this->template->js = new View('admin/reports/reports_js');

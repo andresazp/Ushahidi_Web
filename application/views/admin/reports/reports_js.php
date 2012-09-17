@@ -56,3 +56,79 @@
 			$('#' + id).toggle(400);
 		}
 
+$(function () {
+	$(".tabset .search").click(function() {
+		if ($('.search-tab').hasClass('active'))
+		{
+			$(".search-tab").removeClass('active').slideUp(300, function() { $(".action-tab").slideDown().addClass('active'); });
+		}
+		else
+		{
+			$(".action-tab").removeClass('active').slideUp(300, function() { $(".search-tab").slideDown().addClass('active'); });
+		}
+		
+		return false;
+	});
+	
+	// Category treeview
+	$(".category-column").treeview({
+	  persist: "location",
+	  collapsed: true,
+	  unique: false
+	});
+});
+	
+	
+// Map reference
+var map = null;
+var latitude = <?php echo Kohana::config('settings.default_lat') ?>;
+var longitude = <?php echo Kohana::config('settings.default_lon'); ?>;
+var zoom = <?php echo Kohana::config('settings.default_zoom'); ?>;
+
+jQuery(window).load(function(){
+		
+		// OpenLayers uses IE's VML for vector graphics
+		// We need to wait for IE's engine to finish loading all namespaces (document.namespaces) for VML.
+		// jQuery.ready is executing too soon for IE to complete it's loading process.
+		
+		<?php echo map::layers_js(FALSE); ?>
+		var mapConfig = {
+
+			// Map center
+			center: {
+				latitude: latitude,
+				longitude: longitude,
+			},
+
+			// Zoom level
+			zoom: zoom,
+
+			// Base layers
+			baseLayers: <?php echo map::layers_array(FALSE); ?>
+		};
+
+		map = new Ushahidi.Map('divMap', mapConfig);
+		map.addRadiusLayer({
+			latitude: latitude,
+			longitude: longitude
+		});
+
+		// Subscribe to makerpositionchanged event
+		map.register("markerpositionchanged", function(coords){
+			$("#alert_lat").val(coords.latitude);
+			$("#alert_lon").val(coords.longitude);
+		});
+
+		$('.btn_find').on('click', function () {
+			geoCode();
+		});
+
+		$('#location_find').bind('keypress', function(e) {
+			var code = (e.keyCode ? e.keyCode : e.which);
+			if(code == 13) { //Enter keycode
+				geoCode();
+				return false;
+			}
+		});
+});
+
