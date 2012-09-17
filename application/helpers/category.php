@@ -27,8 +27,10 @@ class category_Core {
 			$disabled = " disabled=\"disabled\"";	
 		}
 
+		$html .= "<label>";
 		$html .= form::checkbox($form_field.'[]', $cid, $category_checked, ' class="check-box"'.$disabled);
 		$html .= $category['category_title'];
+		$html .= "</label>";
 
 		return $html;
 	}
