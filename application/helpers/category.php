@@ -83,7 +83,7 @@ class category_Core {
 			// If this is the first element of a column, start a new UL
 			if ($i == 1)
 			{
-				$html .= '<ul id="category-column-'.$this_col.'">';
+				$html .= '<ul class="category-column category-column-'.$this_col.'">';
 			}
 
 			// Display parent category.
