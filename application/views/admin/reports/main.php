@@ -54,6 +54,25 @@
 							</li>
 							<?php endif; ?>
 						</ul>
+						
+						<div class="sort_by">
+							<?php print form::open(NULL, array('method' => 'get')); ?>
+							<?php echo Kohana::lang('ui_main.sort_by'); ?>
+							<?php echo form::dropdown('order', array(
+								'date' => Kohana::lang('ui_admin.report_date'),
+								'id' => Kohana::lang('ui_main.id'),
+								'datemodify' => Kohana::lang('ui_admin.date_modified'),
+								'dateadd' => Kohana::lang('ui_admin.date_added'),
+								'title' => Kohana::lang('ui_admin.report_title'),
+							), $order_field); 
+							echo form::dropdown('sort', array(
+								'ASC' => Kohana::lang('ui_main.ascending'),
+								'DESC' => Kohana::lang('ui_main.descending'),
+							), $sort); 
+							echo form::hidden('status', $status);
+							echo form::submit('submit', Kohana::lang('ui_main.sort'));
+							echo form::close(); ?>
+						</div>
 					</div>
 				</div>
 				<?php if ($form_error): ?>

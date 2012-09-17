@@ -2535,3 +2535,9 @@ div.dp-popup td.disabled {
 	height: 30px;
 	display: inline-block;
 }
+
+.sort_by {
+	float: right;
+	margin: 0;
+	padding: 9px 10px 0;
+}
